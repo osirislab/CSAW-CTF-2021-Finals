@@ -15,4 +15,4 @@ RDTM R1
 MOVF R0 110
 RDTM R1
 ```
-It shows how cached accesses take 4 ticks, while uncached takes 8.
+It shows how cached accesses take 4 ticks, while uncached takes 8. I think it basically works, we just need a solve to make sure...
