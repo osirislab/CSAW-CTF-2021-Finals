@@ -13,8 +13,8 @@ def assem(filein = "prog.asm",fileo = "ram.hex"):
         chs = l.split()
         opc = chs[0]
         if opc not in mnem2opc:
-            print("UNKOWN INSTRUCTION!")
-            exit(0)
+            fo.write(f"{l.strip()} ")
+            continue
         b0 = 0 + mnem2opc[opc]
         b1 = 0
         if opc in ["ADD","SUB"]:
@@ -41,7 +41,7 @@ def assem(filein = "prog.asm",fileo = "ram.hex"):
             r0 = int(chs[1][1:])
             r1 = int(chs[2][1:])
             tgt = int(chs[3])
-            b0 += r0
+            b0 += r0*16
             b0 += r1*64
             b1 += tgt
         if opc == "JMP":
@@ -76,9 +76,13 @@ def disas(file="ram.hex"):
             ops.append(f"R{op1}")
             ops.append(f"R{op2}")
             ops.append(f"{b1}")
-        if mnem in ["INC"]:
+        if mnem in ["INC","RDTM"]:
             ops.append(f"R{op1}")
         if mnem == "JMP":
+            ops.append(f"{b1}")
+        if mnem in ["JGT","JEQ"]:
+            ops.append(f"R{op1}")
+            ops.append(f"R{op2}")
             ops.append(f"{b1}")
         if mnem == "MOVF" or mnem == "MOVFU":
             ops.append(f"R{op1}")

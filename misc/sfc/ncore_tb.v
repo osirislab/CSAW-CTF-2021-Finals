@@ -44,7 +44,7 @@
   `define DSTAGE_1 4
   `define DSTAGE_2 5
 
-  `define BRANCH_PRED_MAX 5
+  `define BRANCH_PRED_MAX 3
 
 module ncore_tb;
   reg [7:0] safe_rom [0:255];
@@ -116,8 +116,8 @@ module ncore_tb;
 
   always begin
     #5 begin
-      clk = ~clk;
-      tck = tck + 1;
+      clk <= ~clk;
+      tck <= tck + 1;
     end
   end
 
@@ -162,11 +162,13 @@ module ncore_tb;
         increment_pc();
       end
       `INC: begin
+        $display("INC: R%d %d",ram[pc][5:4],regfile[ram[pc][5:4]]);
         regfile[ram[pc][5:4]] <=  regfile[ram[pc][5:4]] + 1;
         increment_pc();
       end
       `SUB: begin
         regfile[ram[pc][5:4]] <=  regfile[ram[pc][7:6]] -  regfile[ram[pc+1][1:0]];
+        $display("SUB: %d %d", regfile[ram[pc][7:6]] -  regfile[ram[pc+1][1:0]],ram[19]);
         increment_pc();
       end
       `MOVF: begin
@@ -252,10 +254,50 @@ module ncore_tb;
         if(cache[1] == ram[pc+1]) begin
           cache_rdy[1] <= 0;
         end
+        $display("write to %d : %d",ram[pc+1],regfile[ram[pc][5:4]][7:0]);
         ram[ram[pc+1]] <= regfile[ram[pc][5:4]][7:0];
         increment_pc();
       end
       `JGT: begin
+        $write("BP:%d",branch_pred);
+        // TAKEN:      ram[pc+1] -> ram[ram[pc+1]][7:6]
+        // NOT TAKEN:  pc + 2    -> ram[pc + 2][7:6]
+        // ADDR T  : regfile[ram[ram[pc+1]][7:6]] + safe_rom[ram[pc+1]+1]
+        // ADDR NT : regfile[ram[pc+2][7:6]] + safe_rom[pc+3] 
+        if (branch_pred>=0) begin
+          if (ram[ram[pc+1]][3:0] == `MOVFI) begin
+            cache[cc] <= ram[ram[ram[pc+1]+1]] + regfile[ram[ram[pc+1]][7:6]];
+            cache_rdy[cc] <= 1;
+            cache_v[cc] <= ram[ram[ram[ram[pc+1]+1]] + regfile[ram[ram[pc+1]][7:6]]];
+          end
+          if (ram[ram[pc+1]][3:0] == `MOVFSI) begin
+            $display("SPECULATIVE! %d", regfile[ram[ram[pc+1]][7:6]]);
+            cache[cc] <= safe_rom[ram[ram[pc+1]+1]] + regfile[ram[ram[pc+1]][7:6]];
+            cache_rdy[cc] <= 1;
+            cache_v[cc] <= ram[safe_rom[ram[ram[pc+1]+1]] + regfile[ram[ram[pc+1]][7:6]]];
+          end
+        end else begin
+          if (ram[pc+2][3:0] == `MOVFI) begin
+            cache[cc] <= regfile[ram[pc+2][7:6]] + ram[ram[pc+3]];
+            cache_rdy[cc] <= 1;
+            cache_v[cc] <= ram[ram[ram[pc+3]] + regfile[ram[pc+2][7:6]]];
+          end
+          if (ram[pc+2][3:0] == `MOVFSI) begin
+             $display("SPECULATIVE! %d %d %d %d",pc+3 ,safe_rom[pc+2+1],regfile[ram[pc+2][7:6]],safe_rom[ram[pc+3]] + regfile[ram[pc+2][7:6]]);
+            cache[cc] <= safe_rom[ram[pc+3]] + regfile[ram[pc+2][7:6]];
+            cache_rdy[cc] <= 1;
+            cache_v[cc] <= ram[safe_rom[ram[pc+3]] + regfile[ram[pc+2][7:6]]];
+          end
+        end
+        if(regfile[ram[pc][5:4]]>regfile[ram[pc][7:6]]) begin
+          pc <= ram[pc+1];
+          branch_pred <= (branch_pred==`BRANCH_PRED_MAX)?branch_pred:branch_pred+1;
+        end else begin
+          branch_pred <= (branch_pred==(-`BRANCH_PRED_MAX))?branch_pred:branch_pred-1;
+          pc <= pc+2;
+        end
+      end
+       `JEQ: begin
         if (branch_pred>=0) begin
           if (ram[ram[pc+1]][3:0] == `MOVFI) begin
             cache[cc] <= ram[ram[pc+1]+1] + regfile[ram[ram[pc+1]][5:4]];
@@ -279,15 +321,6 @@ module ncore_tb;
             cache_v[cc] <= ram[safe_rom[pc+2+1] + regfile[ram[pc+2][5:4]]];
           end
         end
-        if(regfile[ram[pc][5:4]]>regfile[ram[pc][7:6]]) begin
-          pc <= ram[pc+1];
-          branch_pred <= (branch_pred==`BRANCH_PRED_MAX)?branch_pred:branch_pred+1;
-        end else begin
-          branch_pred <= (branch_pred==(-`BRANCH_PRED_MAX))?branch_pred:branch_pred-1;
-          pc <= pc+2;
-        end
-      end
-       `JEQ: begin
         if(regfile[ram[pc][5:4]] == regfile[ram[pc][7:6]]) begin
           pc <= ram[pc+1];
           branch_pred <= (branch_pred==`BRANCH_PRED_MAX)?branch_pred:branch_pred+1;
@@ -337,7 +370,8 @@ module ncore_tb;
 
    initial 
     begin: initial_block
-        $monitor(,$time,": R0: %d,R1: %d,R2: %d,R3: %d",regfile[0],regfile[1],regfile[2],regfile[3]);
+        $monitor(,$time,": PC: %d",pc);
+        // $monitor(,$time,": R0: %d,R1: %d,R2: %d,R3: %d",regfile[0],regfile[1],regfile[2],regfile[3]);
         init_regs();
         emode = 1;
         set_key();
@@ -345,7 +379,7 @@ module ncore_tb;
         load_safeROM();
         load_ram();
         // $display("A %h, B: %h",safe_rom[0],safe_rom[1]);
-        #1500000;
+        #400000;
         print_res(); 
         $finish;
     end :initial_block
