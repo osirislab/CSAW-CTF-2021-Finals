@@ -1,0 +1,16 @@
+{
+  "name": "maze",
+  "category": "rev",
+  "author": "",
+  "description": "Feel free to take a tour, but good luck finding your way out of this one! \n\n`nc {box} {port}`",
+  "flag": "flag{Kn1ght_t0ur_0n_chess_b0ard}",
+  "type": "dynamic",
+  "initial": 500,
+  "minimum": 50,
+  "decay": 400,
+  "internal_port": "5000",
+  "files": [
+    "maze_public"
+  ],
+  "box": "rev.chal.csaw.io"
+}
