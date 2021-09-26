@@ -59,3 +59,6 @@ JMP 0
 00 00
 04 00
 ```
+
+## TODO
+maybe clean up code? and add more verbose overview.
