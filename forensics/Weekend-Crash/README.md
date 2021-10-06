@@ -1,6 +1,6 @@
 # Weekend Crash
 ## Production note
-The zip file for this challenge is hosted on Google Drive and avilable at this link: https://drive.google.com/file/d/16qvSOXVgPJVWiVKB1leNxJ18joKgLhyP/view?usp=sharing
+The zip file for this challenge is hosted on Google Drive and available at this link: https://drive.google.com/file/d/16qvSOXVgPJVWiVKB1leNxJ18joKgLhyP/view?usp=sharing
 
 ## Description
 It’s Friday evening and you have been working nonstop for the past few days on your assignment due at midnight. Alas, fate is not on your side as your computer crashed! Luckily, with your forensics knowledge, you were able to take a snapshot of your memory. But now, your frazzled brain can’t remember what was the state of your assignment. Can you recover the information needed to make sure that you submit it in time?
