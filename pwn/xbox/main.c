@@ -4,16 +4,17 @@
 #include<fcntl.h>
 #include<stdint.h>
 uint64_t page=0x1000;
-char *code=0;
-char *data=0;
+void *code=0;
+void *data=0;
 uint64_t regs[0x10]={0};
 uint64_t pc=0;
 uint64_t msg=0;
 uint64_t ins_ct=0x20;
 uint64_t rsp=0x800;
 uint64_t rbp=0x800;
-int64_t FLAG=0;
 uint64_t * stack=0;
+int64_t FLAG=0;
+
 
 uint8_t get_byte(){
 	uint8_t res=0;
@@ -463,12 +464,10 @@ void run()
 			case 34:
 			case 35:
 				MOV(cmd);break;
-
 			case 36:
 				PUSH();break;
 			case 37:
 				POP();break;
-
 			case 38:
 			case 39:
 				CALL(cmd);break;
