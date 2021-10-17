@@ -15,11 +15,20 @@ uint64_t rbp=0x800;
 uint64_t * stack=0;
 int64_t FLAG=0;
 
-
+void segfault(uint64_t p, uint64_t move){
+	if( p + move >=page and !(p<0x1000))
+		die("segfault");
+	return 1;
+}
 uint8_t get_byte(){
 	uint8_t res=0;
 	segfault(pc,1);
 	res=code[pc++];
+	return res;
+}
+uint64_t get_regs_idx(){
+	uint64_t res=(uint64_t)get_byte();
+	register_index(res);
 	return res;
 }
 uint16_t get_word(){
@@ -55,52 +64,46 @@ void register_index(uint64_t idx){
 	if(idx>=0x10)
 		die("segfault");
 }
-void segfault(uint64_t p, uint64_t move){
-	if( p + move >=page)
-		die("segfault");
-	return 1;
-}
 void die(char *s){
 	printf("%s\n",s);
 	exit(1);
 }
+
 void init(){
 	setvbuf(stdin,0,2,0);
 	setvbuf(stdout,0,2,0);
 	setvbuf(stderr,0,2,0);
-	void *buf;
+	void *buf=0;
 	int f=open("/dev/urandom",O_RDONLY);
 	if(f<=0)
-		die("");
+		die("init");
 	read(f,&buf,8);
 	buf = (long unsigned int)buf & 0xfffffffffffff000;
 	mmap((void *)buf,0x3000,3,0x22,0,0);
 	close(f);
-	code = buf;
-	data = code +page;
-	stack = data+page;
+	code 	= 	buf;
+	data 	= 	code + page;
+	stack 	= 	data + page;
 }
+
 void load(){
-	int f=open("./game",O_RDONLY);
-	unsigned int res= read(f,code,0x2000);
-	if(res!=0x2000)
-		die("");
+	int f = open("./game",O_RDONLY);
+	uint64_t res= read(f,code,0x1000);
+	if( res != 0x1000)
+		die("load");
 	close(f);
 }
 void NOP(){
 	return;
 }
 void ADD(uint8_t c){
-	uint64_t arg1=0;
+	uint64_t arg1=get_regs_idx();
 	uint64_t arg2=0;
 	c-=1;
 	switch(c)
-	{	
-		arg1=(uint64_t)get_byte();
-		register_index(arg1);
+	{
 		case 0://reg + reg
-			arg2=(uint64_t)get_byte();
-			register_index(arg2);
+			arg2=get_regs_idx();
 			regs[arg1]+=regs[arg2];
 			break;
 		case 1://reg + 1 byte
@@ -122,16 +125,13 @@ void ADD(uint8_t c){
 	}
 }
 void SUB(uint8_t c){
-	uint64_t arg1=0;
+	uint64_t arg1=get_regs_idx();
 	uint64_t arg2=0;
 	c-=6;
 	switch(c)
 	{	
-		arg1=(uint64_t)get_byte();
-		register_index(arg1);
 		case 0://reg - reg
-			arg2=(uint64_t)get_byte();
-			register_index(arg2);
+			arg2=get_regs_idx();
 			regs[arg1]-=regs[arg2];
 			setflag(regs[arg1],regs[arg2]);
 			break;
@@ -158,60 +158,46 @@ void SUB(uint8_t c){
 	}
 }
 void MUL(){
-	uint64_t arg1=0;
-	uint64_t arg2=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
-	arg2=(uint64_t)get_byte();
-	register_index(arg2);
+	uint64_t arg1=get_regs_idx();
+	uint64_t arg2=get_regs_idx();
 	regs[arg1]*=regs[arg2];
 	return;
 }
 void DIV(){
-	uint64_t arg1=0;
-	uint64_t arg2=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
-	arg2=(uint64_t)get_byte();
-	register_index(arg2);
+	uint64_t arg1=get_regs_idx();
+	uint64_t arg2=get_regs_idx();
 	if(!regs[arg2])
 		die("0");
 	else
 		regs[arg1]/=regs[arg2];
 }
 void XOR(){
-	uint64_t arg1=0;
-	uint64_t arg2=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
-	arg2=(uint64_t)get_byte();
-	register_index(arg2);
+	uint64_t arg1=get_regs_idx();
+	uint64_t arg2=get_regs_idx();
 	regs[arg1] ^= regs[arg2];
 }
 void JMP(uint8_t c){
 	uint64_t arg1=0;
 	arg1=(uint64_t)get_byte();
-	register_index(arg1);
-	if(arg1>=page)
-		die("segfault");
+	segfault(arg1,0);
 	c-=17;
 	switch(c)
 	{
-		case 0://jmp
+		case 0:
 			break;
-		case 1://je
+		case 1:
 			if(!FLAG)
 				break;
 			return;
-		case 2://jne
+		case 2:
 			if(FLAG)
 				break;
 			return;
-		case 3://jg
+		case 3:
 			if(FLAG>0)
 				break;
 			return;
-		case 4://jl
+		case 4:
 			if(FLAG<0)
 				break;
 			return;
@@ -222,24 +208,16 @@ void JMP(uint8_t c){
 	return;
 }
 void DEC(){
-	uint64_t arg1=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
+	uint64_t arg1=register_index();
 	regs[arg1]--;
 }
 void INC(){
-	uint64_t arg1=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
+	uint64_t arg1=register_index();
 	regs[arg1]++;
 }
 void AND(){
-	uint64_t arg1=0;
-	uint64_t arg2=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
-	arg2=(uint64_t)get_byte();
-	register_index(arg2);
+	uint64_t arg1=register_index();
+	uint64_t arg2=register_index();
 	regs[arg1] &= regs[arg2];
 	if(regs[arg1]==0)
 		FLAG=0;
@@ -247,12 +225,8 @@ void AND(){
 		FLAG=1;
 }
 void OR(){
-	uint64_t arg1=0;
-	uint64_t arg2=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
-	arg2=(uint64_t)get_byte();
-	register_index(arg2);
+	uint64_t arg1=register_index();
+	uint64_t arg2=register_index();
 	regs[arg1] |= regs[arg2];
 	if(regs[arg1]==0)
 		FLAG=0;
@@ -260,9 +234,7 @@ void OR(){
 		FLAG=1;
 }
 void NOT(){
-	uint64_t arg1=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
+	uint64_t arg1=register_index();
 	if(regs[arg1])
 		regs[arg1]=0;
 	else
@@ -270,16 +242,13 @@ void NOT(){
 }
 void MOV(uint8_t c){
 	c-=27;
-	uint64_t arg1=0;
+	uint64_t arg1=register_index();
 	uint64_t arg2=0;
 	uint64_t * tmp=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
 	switch(c)
 	{
 		case 0://reg reg
-			arg2=(uint64_t)get_byte();
-			register_index(arg2);
+			arg2=register_index();
 			regs[arg1]=regs[arg2];
 			break;
 		case 1:
@@ -303,23 +272,49 @@ void MOV(uint8_t c){
 			segfault(0,arg2);
 			tmp = arg2;
 			regs[arg1] = *tmp;
+			break;
 		case 6://reg byte ptr
 			arg2=(uint64_t)get_word();
 			segfault(0,arg2);
 			uint16_t * tmp = arg2;
 			regs[arg1] = *tmp;
+			break;
 		case 7://reg byte ptr
 			arg2=(uint64_t)get_word();
 			segfault(0,arg2);
 			tmp = arg2;
 			regs[arg1] = *tmp;
+			break;
 		case 8://reg byte ptr
 			arg2=(uint64_t)get_word();
 			segfault(0,arg2);
 			tmp = arg2;
 			regs[arg1] = *tmp;
+			break;
 	}
 
+}
+
+void do_push(uint64_t data){
+	segfault(rsp,-8);
+	*(stack+rsp) = data; 
+	rsp-=8;
+}
+void PUSH(){
+	uint64_t arg1=register_index();
+	do_push(regs[arg1]);
+}
+uint64_t do_pop(){
+	uint64_t res = stack[rsp/8];
+	segfault(rsp,8);
+	rsp += 8;
+	return res;
+}
+void POP(){
+	uint64_t arg1=0;
+	arg1=(uint64_t)get_byte();
+	register_index(arg1);
+	regs[arg1] = do_pop();
 }
 void CALL(uint8_t c){
 	c-=38;
@@ -335,29 +330,6 @@ void CALL(uint8_t c){
 		do_push(pc);
 		pc = arg1;
 	}
-}
-void do_push(uint64_t data){
-	segfault(rsp,-8);
-	*(stack+rsp) = data; 
-	rsp-=8;
-}
-void PUSH(){
-	uint64_t arg1=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
-	do_push(regs[arg1]);
-}
-uint64_t do_pop(){
-	uint64_t res = stack[rsp/8];
-	segfault(rsp,8);
-	rsp += 8;
-	return res;
-}
-void POP(){
-	uint64_t arg1=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
-	regs[arg1] = do_pop();
 }
 void RET(){
 	pc = do_pop();
@@ -483,9 +455,9 @@ void run()
 			case 47:
 				OUT(cmd);break;
 			case 0xff:
-				die("EXIT");
+				die("EXT");
 			default:
-				die("unknow operation");
+				die("OP");
 		}
 	}
 }
