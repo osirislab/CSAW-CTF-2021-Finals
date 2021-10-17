@@ -4,8 +4,8 @@
 #include<fcntl.h>
 #include<stdint.h>
 uint64_t page=0x1000;
-void *code=0;
-void *data=0;
+uint8_t *code=0;
+uint8_t *data=0;
 uint64_t regs[0x10]={0};
 uint64_t pc=0;
 uint64_t msg=0;
@@ -16,7 +16,7 @@ uint64_t * stack=0;
 int64_t FLAG=0;
 
 void segfault(uint64_t p, uint64_t move){
-	if( p + move >=page and !(p<0x1000))
+	if( p + move >=page && !(p<0x1000))
 		die("segfault");
 	return 1;
 }
@@ -68,7 +68,6 @@ void die(char *s){
 	printf("%s\n",s);
 	exit(1);
 }
-
 void init(){
 	setvbuf(stdin,0,2,0);
 	setvbuf(stdout,0,2,0);
@@ -85,7 +84,6 @@ void init(){
 	data 	= 	code + page;
 	stack 	= 	data + page;
 }
-
 void load(){
 	int f = open("./game",O_RDONLY);
 	uint64_t res= read(f,code,0x1000);
@@ -208,16 +206,16 @@ void JMP(uint8_t c){
 	return;
 }
 void DEC(){
-	uint64_t arg1=register_index();
+	uint64_t arg1=get_regs_idx();
 	regs[arg1]--;
 }
 void INC(){
-	uint64_t arg1=register_index();
+	uint64_t arg1=get_regs_idx();
 	regs[arg1]++;
 }
 void AND(){
-	uint64_t arg1=register_index();
-	uint64_t arg2=register_index();
+	uint64_t arg1=get_regs_idx();
+	uint64_t arg2=get_regs_idx();
 	regs[arg1] &= regs[arg2];
 	if(regs[arg1]==0)
 		FLAG=0;
@@ -225,8 +223,8 @@ void AND(){
 		FLAG=1;
 }
 void OR(){
-	uint64_t arg1=register_index();
-	uint64_t arg2=register_index();
+	uint64_t arg1=get_regs_idx();
+	uint64_t arg2=get_regs_idx();
 	regs[arg1] |= regs[arg2];
 	if(regs[arg1]==0)
 		FLAG=0;
@@ -234,7 +232,7 @@ void OR(){
 		FLAG=1;
 }
 void NOT(){
-	uint64_t arg1=register_index();
+	uint64_t arg1=get_regs_idx();
 	if(regs[arg1])
 		regs[arg1]=0;
 	else
@@ -242,13 +240,13 @@ void NOT(){
 }
 void MOV(uint8_t c){
 	c-=27;
-	uint64_t arg1=register_index();
+	uint64_t arg1=get_regs_idx();
 	uint64_t arg2=0;
 	uint64_t * tmp=0;
 	switch(c)
 	{
 		case 0://reg reg
-			arg2=register_index();
+			arg2=get_regs_idx();
 			regs[arg1]=regs[arg2];
 			break;
 		case 1:
@@ -269,64 +267,60 @@ void MOV(uint8_t c){
 			break;
 		case 5://reg byte ptr
 			arg2=(uint64_t)get_word();
-			segfault(0,arg2);
+			segfault(arg2,1);
 			tmp = arg2;
-			regs[arg1] = *tmp;
+			regs[arg1] =* (uint8_t *)(tmp+data);
 			break;
 		case 6://reg byte ptr
 			arg2=(uint64_t)get_word();
-			segfault(0,arg2);
-			uint16_t * tmp = arg2;
-			regs[arg1] = *tmp;
+			segfault(arg2,2);
+			tmp = arg2;
+			regs[arg1] = * (uint16_t *)(tmp+data);
 			break;
 		case 7://reg byte ptr
 			arg2=(uint64_t)get_word();
-			segfault(0,arg2);
+			segfault(arg2,4);
 			tmp = arg2;
-			regs[arg1] = *tmp;
+			regs[arg1] = * (uint32_t *)(tmp+data);
 			break;
 		case 8://reg byte ptr
 			arg2=(uint64_t)get_word();
-			segfault(0,arg2);
+			segfault(arg2,8);
 			tmp = arg2;
-			regs[arg1] = *tmp;
+			regs[arg1] = * (uint64_t *)(tmp+data);
 			break;
 	}
 
 }
-
 void do_push(uint64_t data){
 	segfault(rsp,-8);
 	*(stack+rsp) = data; 
 	rsp-=8;
 }
 void PUSH(){
-	uint64_t arg1=register_index();
+	uint64_t arg1=get_regs_idx();
 	do_push(regs[arg1]);
 }
 uint64_t do_pop(){
-	uint64_t res = stack[rsp/8];
 	segfault(rsp,8);
+	uint64_t res = stack[rsp/8];
 	rsp += 8;
 	return res;
 }
 void POP(){
-	uint64_t arg1=0;
-	arg1=(uint64_t)get_byte();
-	register_index(arg1);
+	uint64_t arg1=get_regs_idx();
 	regs[arg1] = do_pop();
 }
 void CALL(uint8_t c){
 	c-=38;
+	uint64_t arg1=0;
 	if(c){
-		uint64_t arg1=0;
-		arg1=(uint64_t)get_byte();
-		register_index(arg1);
+		arg1=get_regs_idx();
 		do_push(pc);
 		pc = regs[arg1];
 	}
 	else{
-		uint64_t arg1=get_qword();
+		arg1=get_qword();
 		do_push(pc);
 		pc = arg1;
 	}
@@ -342,9 +336,8 @@ uint64_t readint(){
 }
 void IN(uint8_t c){
 	c-=41;
-	uint8_t arg1 = (uint64_t)get_byte();
+	uint8_t arg1 = get_regs_idx();
 	uint64_t num=0;
-	register_index(arg1);
 	switch(c){
 		case 0:// read reg
 			read(0,&regs[arg1],1);
@@ -355,14 +348,14 @@ void IN(uint8_t c){
 			break;
 		case 2:
 			num = readint();
-			segfault(num,0);
+			segfault(num,1);
 			read(0,data+num,1);
 			break;
 	}
 }
 void OUT(uint8_t c){
 	c-=44;
-	uint64_t arg1;
+	uint64_t arg1=0;
 	switch(c){
 		case 0:
 			arg1 = get_byte();
@@ -374,12 +367,11 @@ void OUT(uint8_t c){
 			break;
 		case 2:
 			arg1 = get_byte();
-			segfault(arg1,0);
+			segfault(arg1,1);
 			write(1,data[arg1],1);
 			break;
 		case 3:
-			arg1 = get_byte();
-			register_index(arg1);
+			arg1 = get_regs_idx();
 			write(1,regs[arg1],8);
 			break;
 	}
