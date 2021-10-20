@@ -1,0 +1,16 @@
+{
+  "name": "Supply and Demand",
+  "category": "forensics",
+  "author": "ex0dus",
+  "description": "`nc {box} {port}`",
+  "flag": "flag{why_4r3nt_u_pr0t3tct1ng_ur_supp1y_ch41n}",
+  "type": "dynamic",
+  "initial": 200,
+  "minimum": 50,
+  "decay": 50,
+  "files": [
+    "package-lock.json"
+  ],
+  "box": "forensics.chal.csaw.io",
+  "internal_port": 5000
+}
