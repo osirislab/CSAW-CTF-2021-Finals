@@ -1,0 +1,13 @@
+{
+  "name": "United",
+  "category": "web",
+  "author": "Alan Campbell",
+  "description": "NYU United, NYU's 3rd best CTF team is off to a rocky 2021 CTF season. If I were an admin, I'd make some changes to the roster.\n\n[http://{box}:{port}](http://{box}:{port})",
+  "flag": "flag{wh0_n3ed5_a_p4ssw0rd_anyw4y}",
+  "type":"dynamic",
+  "initial": 500,
+  "minimum": 50,
+  "decay": 275,
+  "internal_port": 3000,
+  "box": "web.chal.csaw.io"
+}
