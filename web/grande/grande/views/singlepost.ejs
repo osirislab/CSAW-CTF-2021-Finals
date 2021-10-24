@@ -1,0 +1,14 @@
+<%- include('header') -%>
+<div class="container container-medium">
+<h1 class="title">
+  <%= post.title %>
+</h1>
+<p class="subtitle">
+  A post by <a href="/<%= post.username %>/">@<%= post.username %></a>
+</p>
+<%- post.content %>
+<p class="has-text-centered">
+<button class="button is-danger is-inverted" id="report">Report post to Admin</button>
+</p>
+</div>
+<%- include('footer') -%>
