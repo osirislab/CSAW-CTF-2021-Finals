@@ -1,0 +1,52 @@
+{{> header }}
+
+{{> show_flash_messages }}
+
+<h1>Mass email</h1>
+
+<div class="row">
+  <div class="col-md-8 lead">Send a customized email to all employees</div>
+  <div class="col-md-4">
+    <button class="btn btn-primary bs pull-right" type="button" data-toggle="collapse" data-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+      How it works
+    </button>
+  </div>
+</div>
+
+<div class="collapse bs" id="collapseInfo">
+  <div class="card card-body div-info">
+    <p>
+      The mass email functionality allows you to send customized emails to all of your employees at once.
+    </p>
+    <p>
+      Use one of the following variables to customize the email template:
+    <ul>
+      <li>\{{name}} - name of the user</li>
+      <li>\{{department}} - name of the department</li>
+    </ul>
+    </p>
+  </div>
+</div>
+
+<div>
+  <form action="/email" id="emailform" method="POST">
+    <div class="form-group">
+      <label for="subject">Subject</label>
+      <input class="form-control" id="subject" required placeholder="Subject" value="{{subject}}" type="text" name="subject">
+    </div>
+    <div class="form-group">
+      <textarea class="form-control" placeholder="Email body..." required rows="4" cols="50" name="body" form="emailform">{{#if preview}}{{rawBody}}{{/if}}</textarea>
+    </div>
+    <button type="submit" name="action" formaction="/email" value="Preview" class="btn btn-primary">Preview</button>
+    <button type="submit" name="action" formaction="/email/submit" value="Submit" {{#unless preview}}disabled{{/unless}} class="btn btn-primary">Submit</button>
+  </form>
+</div>
+
+{{#if preview}}
+  <h1>Preview</h1>
+  <span class="bs">Subject: {{subject}}</span>
+  <div class="div-info vs" style="height:300px"><textarea disabled style="height:100%;width:100%;border:none;resize:none">{{body}}</textarea></div>
+{{/if}}
+
+{{> footer }}
+

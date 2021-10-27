@@ -1,0 +1,4 @@
+[submodule "timeoff-management-application"]
+	path = timeoff-management-application
+	url = git@maven.rangeforce.com:rfcontentdev/timeoff-management-application.git
+	branch = CSAW
