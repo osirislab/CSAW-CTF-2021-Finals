@@ -13,5 +13,5 @@ COPY wrapper.sh flag.txt key /app/
 COPY marbles.xinetd /etc/xinetd.d/marbles
 RUN chown -R ctf /app
 
-CMD xinetd -dontfork -d
+CMD xinetd -dontfork
 EXPOSE 5000
