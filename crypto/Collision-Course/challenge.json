@@ -1,7 +1,7 @@
 {
   "name": "Collision Course",
   "category": "crypto",
-  "author": "",
+  "author": "CryptoHack",
   "description": "A database administrator wrote a script to create unique IDs from the original numeric IDs contained within a database. While doing so, they decided to use the original IDs to encrypt his password, since they were sure the original IDs couldn't be recovered. Prove them wrong and recover their password.",
   "flag": "flag{d0nt_g3t_2_s4lty}",
   "type": "dynamic",
@@ -12,7 +12,7 @@
     "encrypt_database.py",
     "encrypted_database.csv",
     "my_aes.py",
-    "password.bin",
+    "password.bin"
   ],
-  "box": "crypto.chal.csaw.io",
+  "box": "crypto.chal.csaw.io"
 }

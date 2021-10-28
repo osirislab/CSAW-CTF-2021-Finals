@@ -1,0 +1,13 @@
+{
+    "name": "Vacation Planner",
+    "category": "web",
+    "author": "RangeForce",
+    "description": "",
+    "flag": "flag{with_with_with_with_each_with_this}",
+    "type": "dynamic",
+    "initial": 500,
+    "minimum": 50,
+    "decay": 275,
+    "files": [],
+    "box": "web.chal.csaw.io"
+  }
