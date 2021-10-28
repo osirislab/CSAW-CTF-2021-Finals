@@ -62,3 +62,5 @@ Solution Notes from verification during CTF play testing:
 ```
 
 [syscall.h]: https://github.com/radare/radare/blob/master/doc/xtra/solaris-sys-syscall.h
+
+Flag = **403=0x2042d473**
