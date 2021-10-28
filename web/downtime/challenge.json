@@ -2,12 +2,13 @@
     "name": "Vacation Planner",
     "category": "web",
     "author": "RangeForce",
-    "description": "",
+    "description": "I need a vacation! Maybe if I plan this out and get permission from my boss I'll go far enough away to come back with a flag.",
     "flag": "flag{with_with_with_with_each_with_this}",
     "type": "dynamic",
     "initial": 500,
     "minimum": 50,
     "decay": 275,
     "files": [],
+    "internal_port": 5000,
     "box": "web.chal.csaw.io"
   }
