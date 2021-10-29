@@ -3,6 +3,9 @@
     "category": "misc",
     "description": "Hidden deep within http://pmh35xhqgkv52vmzkmdqnkmjzv4zjam25asdirnhykz6s76qfac57pid.onion lies the flag you so need.\n\nAuthor: Stephen Mondiguing, Security Scorecard",
     "flag": "FLAG{Und3r_th3_m1cr0sc0p3}",
-    "points": 200,
-    "box": "http://pmh35xhqgkv52vmzkmdqnkmjzv4zjam25asdirnhykz6s76qfac57pid.onion"    
+    "type": "dynamic",
+    "initial": 500,
+    "minimum": 50,
+    "decay": 275,
+    "box": "misc.chal.csaw.io"    
 }
