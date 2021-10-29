@@ -8,8 +8,8 @@
   "initial": 500,
   "minimum": 50,
   "decay": 275,
-  "box": "domain",
-  "internal_port": "port",
+  "box": "rev.chal.csaw.io",
+  "internal_port": "5000",
   "files": [
     "server.py",
   ]
