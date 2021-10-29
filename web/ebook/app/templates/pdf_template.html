@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <style>
+      h1{
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      p{
+        font-family: Arial, Helvetica, sans-serif;
+        max-width: 1200px;
+      }
+      small{
+        font-size: smaller;
+        font-weight: 100;
+        font-family: Arial, Helvetica, sans-serif;
+        text-align: center;
+        width: 100%;
+        position: absolute;
+      }
+    </style>
+    <title>{{book.name}}</title>
+  </head>
+
+  <body>
+    <h1>{{book.name}}</h1>
+    <p>{{book.content  | replace("\n", "<br/>") |safe}}</p>
+    <small>This preview is licensed for {{email | safe}} do not redistribute.</small>
+  </body>
+</html>

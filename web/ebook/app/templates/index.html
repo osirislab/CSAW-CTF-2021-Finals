@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Page Content -->
+<div class="container">
+    {% if success %}
+    <div class="alert alert-success mt-3">{{success}}</div>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{error}}</div>
+    {% endif %}
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    Books
+                </div>
+                <div class="card-body p-0">
+                    {% if books and books[0]%}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Title</th>
+                                <th scope="col">Comments</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr>
+                                <td><strong>{{book.name}}</strong></td>
+                                <td>{{book.summary}}</td>
+                                <td>
+                                    <a href="/order/{{book.id}}">Get preview</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-danger" role="alert">
+                        No books found
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.row -->
+
+</div>
+<!-- /.container -->
+
+{% endblock %}

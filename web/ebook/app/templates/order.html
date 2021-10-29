@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Page Content -->
+<div class="container">
+    {% if success %}
+    <div class="alert alert-success mt-3">{{success}}</div>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{error}}</div>
+    {% endif %}
+
+    <div id="error" class="alert alert-danger mt-3" hidden></div>
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    Get {{book.name}} preview for free
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        We will send this exclusive preview to your email. This document must not be reproduced or redistributed.
+                    </div>
+                    <form action="javascript:order({{book.id}})">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" class="form-control" id="email" required>
+                        </div>
+                        <button type="submit" class="mt-2 btn btn-primary">Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.row -->
+
+</div>
+<!-- /.container -->
+
+
+<script>
+
+    function order(book_id) {
+        data = {
+            "email": document.getElementById("email").value,
+        }
+
+        fetch("/order/"+book_id, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(res => {
+            if (res.status != 200) {
+                res.json().then((json) => {
+                    document.getElementById("error").innerText = json.message;
+                    document.getElementById("error").removeAttribute("hidden");
+                }).catch(() => {
+                    document.getElementById("error").innerText = "An unexpected error occurred";
+                    document.getElementById("error").removeAttribute("hidden");
+                });
+            } else {
+                location.href = "/?success=Preview sent to your email"
+            }
+        });
+    };
+
+</script>
+
+{% endblock %}
