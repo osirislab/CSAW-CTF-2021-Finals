@@ -7,7 +7,7 @@
   "type": "dynamic",
   "initial": 500,
   "minimum": 50,
-  "decay": 400,
+  "decay": 275,
   "internal_port": "5000",
   "files": [
     "maze_public"
