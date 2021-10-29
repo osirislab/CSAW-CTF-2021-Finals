@@ -1,7 +1,7 @@
 {
     "name": "Tor-Rible Site",
     "category": "misc",
-    "description": "Hidden deep within http://pmh35xhqgkv52vmzkmdqnkmjzv4zjam25asdirnhykz6s76qfac57pid.onion lies the flag you so need.\n\nAuthor: Stephen Mondiguing, Security Scorecard",
+    "description": "Hidden deep within http://pmh35xhqgkv52vmzkmdqnkmjzv4zjam25asdirnhykz6s76qfac57pid.onion lies the flag you so need.\n\nAuthor: Stephen Mondiguing, SecurityScorecard",
     "flag": "FLAG{Und3r_th3_m1cr0sc0p3}",
     "type": "dynamic",
     "initial": 500,
