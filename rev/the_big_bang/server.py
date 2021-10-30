@@ -67,7 +67,7 @@ def main():
 		output = foo(output, foo(keys[i], foo(inp[i], iv_b[i], K5, K6), K3, K4), K1, K2)
 		if not guardian(output, i, keys):
 			print("Bazinga! You just fell to one of my classic pranks")
-			break
+			exit(0)
 	print(f"Congratulations, you are smarter than Sheldon!\nHere is your flag:\n{output}")
 
 if __name__ == "__main__":
