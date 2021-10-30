@@ -3,9 +3,7 @@ https://blog.devolutions.net/2020/08/why-you-should-never-use-zipcrypto
 
 solver to obtain the zip keys: 
 
-bkcrack -C Tax_Ret_Form_Nov_2021.zip -c Tax_Ret_Form_Nov_2021.pdf -P Tax_Ret_Form_Blank.zip -p Tax_Ret_Form_Blank.pdf -t 12
-
-(-t 12 is to make sure we are taking just 12 bytes, we can do it with much much more, even with all the blank form, hence it is possible to commit or extend the use of this flag)
+bkcrack -C Tax_Ret_Form_Nov_2021.zip -c Tax_Ret_Form_Nov_2021.pdf -P Tax_Ret_Form_Blank.zip -p Tax_Ret_Form_Blank.pdf 
 
 use the keys to make a new zip archive with known password "cracked":
 
