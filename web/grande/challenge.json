@@ -1,0 +1,12 @@
+{
+  "name": "grande",
+  "category": "web",
+  "author": "itszn",
+  "description": "https://grande-blog.site",
+  "flag": "flag{__is__proto__a__feature__or__a__bug__}",
+  "type": "dynamic",
+  "initial": 500,
+  "minimum": 50,
+  "decay": 275,
+  "files": ["grande.tar.gz"]
+}
