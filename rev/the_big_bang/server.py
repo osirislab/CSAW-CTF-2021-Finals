@@ -77,6 +77,3 @@ if __name__ == "__main__":
 		print(random.choice(jokes))	
 	finally:
 		exit(0)
-		
-		
-		
