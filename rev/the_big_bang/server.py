@@ -75,3 +75,8 @@ if __name__ == "__main__":
 		main()
 	except Exception:
 		print(random.choice(jokes))	
+	finally:
+		exit(0)
+		
+		
+		
