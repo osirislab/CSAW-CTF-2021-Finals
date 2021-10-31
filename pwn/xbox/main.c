@@ -10,8 +10,8 @@ uint64_t regs[0x10]={0};
 uint64_t pc=0;
 uint64_t msg=0;
 uint64_t ins_ct=0x20;
-uint64_t rsp=0x800;
-uint64_t rbp=0x800;
+regs[14]=0x800;//rbp
+regs[15]=0x800;//rsp
 uint64_t * stack=0;
 int64_t FLAG=0;
 
@@ -242,7 +242,6 @@ void MOV(uint8_t c){
 	c-=27;
 	uint64_t arg1=get_regs_idx();
 	uint64_t arg2=0;
-	uint64_t * tmp=0;
 	switch(c)
 	{
 		case 0://reg reg
@@ -268,43 +267,39 @@ void MOV(uint8_t c){
 		case 5://reg byte ptr
 			arg2=(uint64_t)get_word();
 			segfault(arg2,1);
-			tmp = arg2;
-			regs[arg1] =* (uint8_t *)(tmp+data);
+			regs[arg1] =* (uint8_t *)(arg2+data);
 			break;
 		case 6://reg byte ptr
 			arg2=(uint64_t)get_word();
 			segfault(arg2,2);
-			tmp = arg2;
-			regs[arg1] = * (uint16_t *)(tmp+data);
+			regs[arg1] = * (uint16_t *)(arg2+data);
 			break;
 		case 7://reg byte ptr
 			arg2=(uint64_t)get_word();
 			segfault(arg2,4);
-			tmp = arg2;
-			regs[arg1] = * (uint32_t *)(tmp+data);
+			regs[arg1] = * (uint32_t *)(arg2+data);
 			break;
 		case 8://reg byte ptr
 			arg2=(uint64_t)get_word();
 			segfault(arg2,8);
-			tmp = arg2;
-			regs[arg1] = * (uint64_t *)(tmp+data);
+			regs[arg1] = * (uint64_t *)(arg2+data);
 			break;
 	}
 
 }
 void do_push(uint64_t data){
-	segfault(rsp,-8);
-	*(stack+rsp) = data; 
-	rsp-=8;
+	segfault(regs[15],-8);
+	*(stack+regs[15]) = data; 
+	regs[15]-=8;
 }
 void PUSH(){
 	uint64_t arg1=get_regs_idx();
 	do_push(regs[arg1]);
 }
 uint64_t do_pop(){
-	segfault(rsp,8);
-	uint64_t res = stack[rsp/8];
-	rsp += 8;
+	segfault(regs[15],8);
+	uint64_t res = stack[regs[15]/8];
+	regs[15] += 8;
 	return res;
 }
 void POP(){
@@ -376,6 +371,27 @@ void OUT(uint8_t c){
 			break;
 	}
 }
+void LOAD(uint8_t c){
+	c-=48;
+	uint64_t arg1 = get_word();
+	uint64_t arg2 = get_regs_idx();
+	
+	switch(c){ 
+		case 0:
+			segfault(arg1,1);
+			memcpy(data[arg1],regs[arg2],1);
+		case 1:
+			segfault(arg1,2);
+			memcpy(data[arg1],regs[arg2],2);
+		case 2:
+			segfault(arg1,4);
+			memcpy(data[arg1],regs[arg2],4);
+		case 3:
+			segfault(arg1,8);
+			memcpy(data[arg1],regs[arg2],8);
+	}
+}
+void 
 void run()
 {
 	uint8_t cmd=0;
@@ -446,6 +462,11 @@ void run()
 			case 46:
 			case 47:
 				OUT(cmd);break;
+			case 48:
+			case 49:
+			case 50:
+			case 51:
+				load(cmd);break;
 			case 0xff:
 				die("EXT");
 			default:
