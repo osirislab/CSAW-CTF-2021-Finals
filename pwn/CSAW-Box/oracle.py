@@ -25,7 +25,7 @@ def load_varible_from_stack(offset,regs,length=4):#mov     edx, [rbp+var_4]
 	return res
 def jmp(t,gap):
 	h = gap >>0x8
-	l = gag % 0x100; 
+	l = gap % 0x100; 
 	if t == 'jmp':
 		return b'\x11{}{}'.format(h,l)
 	elif t =='jz':
@@ -33,7 +33,7 @@ def jmp(t,gap):
 	elif t=='ja':
 		return b'\x14{}{}'.format(h,l)
 	elif t=='jnz':
-		return b'\x12{}{}'.format(h,l)
+		return b'\x13{}{}'.format(h,l)
 def add_regs(reg1,reg2):
 	return b'\x01{}{}'.format(reg1,reg2)
 def deref_reg(reg1,reg2,length=1):
@@ -43,7 +43,7 @@ def test_reg(reg):
 	return b'\x38{}'.format(reg)
 def do_write(reg):#reg means the paremater, should be a address 
 	return b'\x1b\x04{}\x2c'.format(reg)
-def varible_add(offset,num,length=4):# rbx 暂存
+def varible_add(offset,num,length=4):# rbx 
 	if(length==4):
 		res = b'\x07\x0e{}\x36\x01\x0e\x02\x01{}\x02\x0e{}'.format(offset,num,offset)
 	return res
@@ -67,6 +67,20 @@ Escape=len(RO)
 RO+="Escape from the CSAW-box?\0"
 Out_there=len(RO)
 RO+="Out there, you don’t stand a chance. I believe you will be back soon!\0"
+Logo_add =len(RO)
+RO+="  ______    ______    ______   __       __  __   ______     __   \n"
+RO+=" /      \\  /      \\  /      \\ /  |  _  /  |/  | /      \\  _/  |  \n"
+RO+="/$$$$$$  |/$$$$$$  |/$$$$$$  |$$ | / \\ $$ |$$/ /$$$$$$  |/ $$ |  \n"
+RO+="$$ |  $$/ $$ \\__$$/ $$ |__$$ |$$ |/$  \\$$ |$/  $$____$$ |$$$$ |  \n"
+RO+="$$ |      $$      \\ $$    $$ |$$ /$$$  $$ |     /    $$/   $$ |  \n"
+RO+="$$ |   __  $$$$$$  |$$$$$$$$ |$$ $$/$$ $$ |    /$$$$$$/    $$ |  \n"
+RO+="$$ \\__/  |/  \\__$$ |$$ |  $$ |$$$$/  $$$$ |    $$ |_____  _$$ |_ \n"
+RO+="$$    $$/ $$    $$/ $$ |  $$ |$$$/    $$$ |    $$       |/ $$   |\n"
+RO+=" $$$$$$/   $$$$$$/  $$/   $$/ $$/      $$/     $$$$$$$$/ $$$$$$/ \n"
+RO+="                                                                 \n"
+RO+="                                                                 \n"
+
+
 
 data =b''
 # puts
@@ -126,6 +140,7 @@ data+=leave_ret
 pin_vul=len(data)
 #vul
 data+=head
+pin_5=len(data)
 data+=set_reg(0,0)
 data+=call(pin_add)
 data+=set_reg(0x5,Escape)
@@ -133,36 +148,25 @@ data+=PUTS
 data+=set_reg(0x0,0)
 data+=call(pin_check)
 data+=test_reg(0)
-data+=jmp('jnz'??)
+pin_6=len(data)+3
+data+=jmp('jnz',pin_5-pin_6)
 data+=set_reg(0x5,Out_there)
 data+=PUTS
 data+=leave_ret
 #vul end
-pin_vul=len(logo)
+pin_logo=len(data)
 #logo 
 data+=head
-data+=set_reg(0x5,??)
-data+=PUTS
-data+=set_reg(0x5,??)
-data+=PUTS
-data+=set_reg(0x5,??)
-data+=PUTS
-data+=set_reg(0x5,??)
-data+=PUTS
-data+=set_reg(0x5,??)
-data+=PUTS
-data+=set_reg(0x5,??)
+data+=set_reg(0x5,Logo_add)
 data+=PUTS
 data+=leave_ret
 #logo end
 # main
 data+=head
 data+=set_reg(0,0)
-data+=call??#init
+data+=call(pin_logo)
 data+=set_reg(0,0)
-data+=call?? logo
-data+=set_reg(0,0)
-data+=call??vul
+data+=call(pin_vul)
 data+=set_reg(0,0)
 data+=leave_ret
 # main end
