@@ -1,13 +1,12 @@
 import numpy as np
 import sys
-#import logging
 from cipher.cipher import Cipher
 from cipher.mathutils import random_poly
 from sympy.abc import x
 from sympy import ZZ, Poly
 import math
-import gmpy2
-from gmpy2 import mpfr, div
+#import gmpy2
+#from gmpy2 import mpfr, div
 
 #priv_key_file = "private_key.npz"
 #pub_key_file = "public_key.npz"
@@ -133,9 +132,8 @@ def decrypt(priv_key, input_arr, bin_input=False):
         raise Exception("Input is too large for current N")
     return cipher.decrypt(Poly(input_arr[::-1], x).set_domain(ZZ)).all_coeffs()[::-1]
 
-
-def invalid_ciphertext(ct1, ct2):
-    return len(ct1)!=len(ct2) or div(mpfr(str(int(ct1, 16))),mpfr((str(int(ct2, 16))))) != 1.0
+#def invalid_ciphertext(ct1, ct2):
+#    return len(ct1)!=len(ct2) or div(mpfr(str(int(ct1, 16))),mpfr((str(int(ct2, 16))))) != 1.0
 
 def get_password():
     with open("password.txt") as file:
@@ -148,7 +146,7 @@ def main():
     password = get_password()
     #print("The password is " + str(password))
     #root = logging.getLogger()
-    gmpy2.get_context().precision=1000
+    #gmpy2.get_context().precision=1000
     #root.setLevel(logging.DEBUG)
     #ch = logging.StreamHandler(sys.stdout)
     #ch.setLevel(logging.DEBUG)
@@ -177,7 +175,7 @@ def main():
     print(str(public_key) + "\n")
     pwd_ct = encrypt_command(password.encode(), public_key)
     print("   The password ciphertext is " + pwd_ct + "\n")
-    print("\n   Have at it!\n")
+    print("   Have at it!\n")
 
     while True:
         print("/------------------------------\\")
@@ -188,7 +186,8 @@ def main():
         print("|   decrypt <ciphertext>       |")
         print("|   solve_challenge <password> |")
         print("|   exit                       |")
-        print("\\------------------------------/")
+        print("\\------------------------------/\n")
+        print("> ", end="")
         sys.stdout.flush()
         parts = sys.stdin.readline()[:-1].split(" ")
 
@@ -196,7 +195,7 @@ def main():
             if parts[0] == "encrypt":
                 pt = parts[1]
                 #print("About to encrypt.")
-                print(encrypt_command(bytes.fromhex(pt), public_key))
+                print("\n" + encrypt_command(bytes.fromhex(pt), public_key) + "\n")
                 #print("command encrypted.")
                 sys.stdout.flush()
             elif parts[0] == "decrypt":
@@ -206,13 +205,13 @@ def main():
                 #print("pwd_ct = " + str(pwd_ct))
                 #print("   pwd_ct_class = " + str(pwd_ct.__class__))
                 if ct == pwd_ct:
-                    print("Hey, you tried to decrypt the password ciphertext. That's illegal.")
+                    print("\nHey, you tried to decrypt the password ciphertext. That's illegal.")
                     sys.stdout.flush()
                     raise Exception()
                 else:
                     #command = bytes.fromhex(parts[2])
                     decrypted = decrypt_command(bytes.fromhex(ct),private_key)
-                    print("Decrypted ciphertext: " + str(decrypted))
+                    print("\n"+ decrypted.decode() + "\n")
                 #if command not in decrypt_command(ct, private_key) or invalid_ciphertext(encrypt_command(command, public_key), parts[1]):
                 #    raise Exception()
             elif parts[0] == "solve_challenge":
@@ -222,18 +221,20 @@ def main():
                 #print("password = " + str(password))
                 #print("   with class " + str(candidate_password.__class__))
                 if candidate_password == password:
-                    print("What?! How did you do that??")
+                    print("\nWhat?! How did you do that??\n")
                     with open("flag.txt") as file:
                         print("".join(file.readlines()))
+                else:
+                    print("\nNope!\n")
             elif parts[0] == "exit":
-                print("Bye!")
+                print("\nBye!")
                 sys.stdout.flush()
                 return
             else:
-                print("Unknown command.")
+                print("\nUnknown command.")
                 raise Exception()
         except:
-            print("Something went wrong...")
+            print("\nSomething went wrong...")
             print("...try again?\n")
             sys.stdout.flush()
     
