@@ -1,0 +1,14 @@
+{
+    "name": "Ebook",
+    "category": "web",
+    "author": "",
+    "description": "Do you like reading? Check out this website to get a preview of some great books. \n\n[http://{box}:{port}](http://{box}:{port})",
+    "flag": "flag{1bf6c08dfe83a9d42e77c6915b0260f5}",
+    "type": "dynamic",
+    "initial": 500,
+    "minimum": 50,
+    "decay": 275,
+    "files": [],
+    "internal_port": 5000,
+    "box": "web.chal.csaw.io"
+  }
