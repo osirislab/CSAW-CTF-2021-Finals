@@ -1,7 +1,0 @@
-
-*.swp
-*.swo
-*.swn
-*.swm
-node_modules/
-*.sqlite
