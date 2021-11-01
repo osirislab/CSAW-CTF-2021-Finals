@@ -1,0 +1,65 @@
+name: Autodeploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  deploy-web:
+    runs-on: ["self-hosted", "web"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: build images
+        run: ctfdbot build web.chal.csaw.io .
+      - name: update ctfd
+        run: ctfdbot update web.chal.csaw.io .
+      - name: deploy containers
+        run: ctfdbot deploy web.chal.csaw.io
+        
+  deploy-pwn:
+    runs-on: ["self-hosted", "pwn"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: build images
+        run: ctfdbot build pwn.chal.csaw.io .
+      - name: update ctfd
+        run: ctfdbot update pwn.chal.csaw.io .
+      - name: deploy containers
+        run: ctfdbot deploy pwn.chal.csaw.io
+                
+  deploy-rev:
+    runs-on: ["self-hosted", "rev"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: build images
+        run: ctfdbot build rev.chal.csaw.io .
+      - name: update ctfd
+        run: ctfdbot update rev.chal.csaw.io .
+      - name: deploy containers
+        run: ctfdbot deploy rev.chal.csaw.io
+                
+  deploy-crypto:
+    runs-on: ["self-hosted", "crypto"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: build images
+        run: ctfdbot build crypto.chal.csaw.io .
+      - name: update ctfd
+        run: ctfdbot update crypto.chal.csaw.io .
+      - name: deploy containers
+        run: ctfdbot deploy crypto.chal.csaw.io
+                     
+  deploy-misc:
+    runs-on: ["self-hosted", "misc"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: build images
+        run: ctfdbot build misc.chal.csaw.io .
+      - name: update ctfd
+        run: ctfdbot update misc.chal.csaw.io .
+      - name: deploy containers
+        run: ctfdbot deploy misc.chal.csaw.io
+     
