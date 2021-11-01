@@ -1,9 +1,9 @@
 {
-  "name": "zip-crypto",
+  "name": "Zip Crypto",
   "category": "crypto",
   "author": "mastertg",
   "description": "",
-  "flag": "flag{}",
+  "flag": "flag{5up3r_53cr37_p455w0rd}",
   "type": "dynamic",
   "initial": 500,
   "minimum": 50,
