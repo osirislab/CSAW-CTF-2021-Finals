@@ -2,6 +2,7 @@
 #07 sub 02 add byte
 #04 rsi \ 05 rdi 
 #gadget
+from pwn import *
 store_parameter = b'\x1b\x00\x0e\x07\x00{}\x31\x00\x05'#mov     [rbp+var_18], rdi
 head =b"\x24\x0e\x23\x0e\x0f"
 leave_ret=b'\x1b\x0f\x0e\x25\x0e\x28'
@@ -31,6 +32,8 @@ def jmp(t,gap):
 		return b'\x12{}{}'.format(h,l)
 	elif t=='ja':
 		return b'\x14{}{}'.format(h,l)
+	elif t=='jnz':
+		return b'\x12{}{}'.format(h,l)
 def add_regs(reg1,reg2):
 	return b'\x01{}{}'.format(reg1,reg2)
 def deref_reg(reg1,reg2,length=1):
@@ -52,11 +55,18 @@ def mov_qword(reg,num):
 	return b"\x1f{}{}".format(reg,p64(num))
 def cmp_reg_num(reg,num):
 	return '\x08{}{}'.format(reg,p16(num))
+def call(address):
+	return b'\x27{}'.format(p16(address))
+
 RO=b''
 LengthOfMessage=len(RO)
 RO =b'LengthOfMessage:\0'
 Content=len(RO)
 RO+=b'Content:\0'
+Escape=len(RO)
+RO+="Escape from the CSAW-box?\0"
+Out_there=len(RO)
+RO+="Out there, you don’t stand a chance. I believe you will be back soon!\0"
 
 data =b''
 # puts
@@ -82,6 +92,7 @@ pin_2 = len(data)+3
 data+=jmp("jmp",pin_2-pin_0)
 data+=leave_ret
 # puts end
+pin_add=len(data)
 # add
 data+=head
 data+=sub_rsp(0x10)
@@ -99,6 +110,7 @@ data+= b'\x39\x3a'
 pin_4= len(data)
 data+=leave_ret
 # add end
+pin_check=len(data)
 #check
 data+=head
 data+=sub_rsp(0x30)
@@ -111,20 +123,22 @@ data+=jmp('jz',3)
 data+=set_reg(0,0)
 data+=leave_ret
 #check end
+pin_vul=len(data)
 #vul
 data+=head
 data+=set_reg(0,0)
-data+=call??
-data+=set_reg(0x5,??)
+data+=call(pin_add)
+data+=set_reg(0x5,Escape)
 data+=PUTS
 data+=set_reg(0x0,0)
-data+=call??
+data+=call(pin_check)
 data+=test_reg(0)
 data+=jmp('jnz'??)
-data+=set_reg(0x5,??)
+data+=set_reg(0x5,Out_there)
 data+=PUTS
 data+=leave_ret
 #vul end
+pin_vul=len(logo)
 #logo 
 data+=head
 data+=set_reg(0x5,??)

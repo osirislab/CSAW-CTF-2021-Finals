@@ -1,23 +1,20 @@
-#include<stdio.h>
 #include<sys/types.h>
 #include<sys/stat.h>
+#include<stdio.h>
 #include<fcntl.h>
 #include<stdint.h>
+
 uint64_t page=0x1000;
 uint8_t *code=0;
 uint8_t *data=0;
 uint64_t regs[0x10]={0};
 uint64_t pc=0;
-uint64_t msg=0;
-uint64_t ins_ct=0x20;
-regs[14]=0x800;//rbp
-regs[15]=0x800;//rsp
 int64_t FLAG=0;
 uint8_t * ReadOnly=0;
 void * PTR=0;
 
 void segfault(uint64_t p, uint64_t move){
-	if( p + move >=page && !(p<0x1000))
+	if( p + move >=page && p>=0x1000))
 		die("segfault");
 	return 1;
 }
@@ -73,6 +70,8 @@ void init(){
 	setvbuf(stdin,0,2,0);
 	setvbuf(stdout,0,2,0);
 	setvbuf(stderr,0,2,0);
+	regs[0xe]=0x800;//rbp
+	regs[0xf]=0x800;//rsp
 	void *buf=0;
 	int f=open("/dev/urandom",O_RDONLY);
 	if(f<=0)
@@ -318,7 +317,7 @@ void CALL(uint8_t c){
 		pc = regs[arg1];
 	}
 	else{
-		arg1=get_qword();
+		arg1=get_word();
 		do_push(pc);
 		pc = arg1;
 	}
