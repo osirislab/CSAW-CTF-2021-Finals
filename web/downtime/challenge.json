@@ -2,7 +2,7 @@
     "name": "Vacation Planner",
     "category": "web",
     "author": "RangeForce",
-    "description": "I need a vacation! Maybe if I plan this out and get permission from my boss I'll go far enough away to come back with a flag.",
+    "description": "I need a vacation! Maybe if I plan this out and get permission from my boss I'll go far enough away to come back with a flag. \n\n[http://{box}:{port}](http://{box}:{port})",
     "flag": "flag{with_with_with_with_each_with_this}",
     "type": "dynamic",
     "initial": 500,
