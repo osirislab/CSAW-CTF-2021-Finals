@@ -22,11 +22,11 @@ unsigned int readint()
 }
 void add()
 {
-	printf("LengthOfMessage:\n");
+	puts("LengthOfMessage:");
 	unsigned int size = readint();
 	if(size<0x888)
 	{	ptr=malloc(size);
-		printf("Content:\n");
+		puts("Content:");
 		read(0,ptr,size);
 		free(ptr);
 		ptr=0;
@@ -43,9 +43,9 @@ void vul()
 	
 	while(1){
 	add();
-	printf("Escape from the CSAW-box?\n");	
+	puts("Escape from the CSAW-box?");	
 	if(!check()){
-			printf("Out there, you don’t stand a chance. I believe you will be back soon!");
+			puts("Out there, you don’t stand a chance. I believe you will be back soon!");
 			break;}
 	}
 }
