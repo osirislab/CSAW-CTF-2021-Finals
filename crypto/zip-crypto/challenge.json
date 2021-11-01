@@ -1,0 +1,17 @@
+{
+  "name": "zip-crypto",
+  "category": "crypto",
+  "author": "mastertg",
+  "description": "",
+  "flag": "flag{}",
+  "type": "dynamic",
+  "initial": 500,
+  "minimum": 50,
+  "decay": 275,
+  "files": [
+    "Tax_Ret_Form_Nov_2021.zip",
+    "Tax_Ret_Form_Blank.pdf"
+  ],
+  "box": "crypto.chal.csaw.io",
+  "internal_port": 5000
+}
