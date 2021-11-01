@@ -2,16 +2,14 @@
   "name": "Beyond_Quantum",
   "category": "crypto",
   "author": "N4T_20",
-  "description": "Qubits, qubits everywhere and not a byte to crack! `nc {box} {port}`",
-  "flag": "flag{1_h34rd_p0st-qu4ntum_crypt0_w45_h4rd_but_1t_w4s_NTRU!C1ph3r_1mpl3m3nt4t10n_by_J3drz3j_Kr4uz3}",
+  "description": "A challenge on the easy side that we kept in the mix for its educational value if you haven't seen it before. `nc {box} {port}`",
+  "flag": "flag{I_h34rd_p05t-qu4ntum_crypt0_w45_h4rd_but_1t_w4s_NTRU!Or1g1n4l_NTRU_1mpl3m3nt4t10n_by_J3drz3j_Kr4uz3}",
   "type": "dynamic",
   "initial": 500,
   "minimum": 50,
   "decay": 275,
   "files": [
-    "server.py",
-    "cipher.zip",
-    "public_key"
+    "handout.zip"
   ],
   "box": "crypto.chal.csaw.io",
   "internal_port": 5000
