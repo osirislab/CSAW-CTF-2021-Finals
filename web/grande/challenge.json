@@ -8,5 +8,6 @@
   "initial": 500,
   "minimum": 50,
   "decay": 275,
-  "files": ["grande.tar.gz"]
+  "files": ["grande.tar.gz"],
+  "box": "web.chal.csaw.io"
 }
