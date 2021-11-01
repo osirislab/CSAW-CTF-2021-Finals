@@ -1,7 +1,6 @@
 #include<stdio.h>
 #include<string.h>
 #include <stdlib.h>
-
 void *ptr=0;
 unsigned int readint()
 {
@@ -82,4 +81,3 @@ int main()
 	logo();
 	vul();
 }
-
