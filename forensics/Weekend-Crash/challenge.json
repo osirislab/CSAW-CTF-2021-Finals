@@ -1,0 +1,12 @@
+{
+    "name": "Weekend Crash",
+    "category": "forensics",
+    "author": "ex0dus",
+    "description": "It’s Friday evening and you have been working nonstop for the past few days on your assignment due at midnight. Alas, fate is not on your side as your computer crashed! Luckily, with your forensics knowledge, you were able to take a snapshot of your memory. But now, your frazzled brain can’t remember what was the state of your assignment. Can you recover the information needed to make sure that you submit it in time?\nhttps://csaw-final-challenges.s3.us-east-2.amazonaws.com/weekend_crash.zip",
+    "flag": "flag{foxes_dont_like_cookies}",
+    "type": "dynamic",
+    "initial": 500,
+    "minimum": 50,
+    "decay": 275,
+    "box": "forensics.chal.csaw.io"
+  }
