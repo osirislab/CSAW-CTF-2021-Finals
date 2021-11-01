@@ -1,56 +1,127 @@
 import numpy as np
 import sys
-import logging
+#import logging
 from cipher.cipher import Cipher
 from cipher.mathutils import random_poly
 from sympy.abc import x
 from sympy import ZZ, Poly
 import math
+import gmpy2
+from gmpy2 import mpfr, div
 
-priv_key_file = "private_key"
-pub_key_file = "public_key"
-input_file = "flag.txt"
+#priv_key_file = "private_key.npz"
+#pub_key_file = "public_key.npz"
+#input_file = "flag.txt"
 #log = logging.getLogger("cipher")
 
 #n = 167
 #p = 3
 #q = 128
 
-def encrypt_command(data):
+def encrypt_command(data, public_key):
+    #print("starting encrypt_command")
     input_arr = np.unpackbits(np.frombuffer(data, dtype=np.uint8))
+    #print("input_arr = " + str(input_arr))
     input_arr = np.trim_zeros(input_arr, 'b')
-    output = encrypt(pub_key_file, input_arr, bin_output=True)
+    #print("input_arr = " + str(input_arr))
+    #print("In encrypt_command: about to encrypt.")
+    output = encrypt(public_key, input_arr, bin_output=True)
+    #print("In encrypt_command: encrypted.")
+    #print("output = " + str(output))
     output = np.packbits(np.array(output).astype(np.int)).tobytes().hex()
+    #print("output = " + str(output))
     return output
 
 
-def decrypt_command(data):
+def decrypt_command(data, private_key):
     input_arr = np.unpackbits(np.frombuffer(data, dtype=np.uint8))
     input_arr = np.trim_zeros(input_arr, 'b')
-    output = decrypt(priv_key_file, input_arr, bin_input=True)
+    #print("In decrypt_command: ct = " + str(data))
+    #print("   input_arr = " + str(input_arr))
+    #print("   private_key = " + str(private_key))
+    output = decrypt(private_key, input_arr, bin_input=True)
+    #print("got output.")
+    #print("output = " + str(output))
     output = np.packbits(np.array(output).astype(np.int)).tobytes().hex()
     output = bytes.fromhex(output)
     return output
 
+def generate(N, p, q):#, priv_key_file, pub_key_file):
+    #print("in generate")
+    #print(str(pub_key_file))
+    cipher = Cipher(N, p, q)
+    #print("generated cipher")
+    cipher.generate_random_keys() # creates f_poly, g_poly. Do I not need to save the g_poly?
+    #print("generated random keys")
+    h = np.array(cipher.h_poly.all_coeffs()[::-1])
+    #print("got h")
+    #print("h = " + str(h))
+    #f, f_p = cipher.f_poly.all_coeffs()[::-1], cipher.f_p_poly.all_coeffs()[::-1]
+    f, f_p = np.array(cipher.f_poly.all_coeffs()[::-1]), np.array(cipher.f_p_poly.all_coeffs()[::-1])
+    #print("got f, f_p")
+    private_key = {'N':N,'p':p,'q':q,'f':f,'f_p':f_p}
+    #np.savez_compressed(priv_key_file, N=N, p=p, q=q, f=f, f_p=f_p)
+    #print("saved private key to {} file".format(priv_key_file))
+    #log.info("Private key saved to {} file".format(priv_key_file))
+    #try:
+        #print("Saving public key")
+        #print("public key is {}".format(pub_key_file))
+    public_key = {'N':N,'p':p,'q':q,'h':h}
+    #np.savez_compressed(pub_key_file, N=N, p=p, q=q, h=h)
+    #except Exception as ex:
+    #    print("Something went wrong: exception was " + str(ex))
+    #sleep(2)
+    #print("saved public key")
+    #print("saved public key to {} file".format(pub_key_file))
+    #log.info("Public key saved to {} file".format(pub_key_file))
+    return (private_key, public_key)
 
-def encrypt(pub_key_file, input_arr, bin_output=False):
-    pub_key = np.load(pub_key_file, allow_pickle=True)
+def encrypt(pub_key, input_arr, bin_output=False):
+    #pub_key = np.load(pub_key_file, allow_pickle=True)
+    #print("In encrypt.")
+    #for key in pub_key.keys():
+    #    print(str(key))
+    #print("N = " + str(int(pub_key['N'])))
+    #print("p = " + str(int(pub_key['p'])))
+    #print("q = " + str(int(pub_key['q'])))
+    #print("pub_key = " + str(pub_key))
     cipher = Cipher(int(pub_key['N']), int(pub_key['p']), int(pub_key['q']))
+    #print("cipher class = " + str(cipher.__class__))
+    #try:
+        #print("h class = " + str(pub_key['h'].__class__))
+    #    print("About to print h")
+    #    print(pub_key['h'])
+        #print("h = " + str(pub_key['h'].astype(np.int)))
+    #except Exception as ex:
+    #    print(ex)
+    #print("h class = " + str(pub_key['h'].astype(np.int)))
+    #print("h = " + str(pub_key['h']))
+    #print("Input for Poly = " + str(pub_key['h'].astype(np.int)[::-1].__class__))
     cipher.h_poly = Poly(pub_key['h'].astype(np.int)[::-1], x).set_domain(ZZ)
+    #print("cipher.h_poly = " + str(cipher.h_poly.__class__))
     if cipher.N < len(input_arr):
         raise Exception("Input is too large for current N")
+    #print("About to encrypt.")
     output = (cipher.encrypt(Poly(input_arr[::-1], x).set_domain(ZZ),
                             random_poly(cipher.N, int(math.sqrt(cipher.q)))).all_coeffs()[::-1])
+    #print("Encrypted.")
     if bin_output:
         k = int(math.log2(cipher.q))
         output = [[0 if c == '0' else 1 for c in np.binary_repr(n, width=k)] for n in output]
     return np.array(output).flatten()
 
-def decrypt(priv_key_file, input_arr, bin_input=False):
-    priv_key = np.load(priv_key_file, allow_pickle=True)
+def decrypt(priv_key, input_arr, bin_input=False):
+    #print("In decrypt.")
+    #priv_key = np.load(priv_key_file, allow_pickle=True)
+    #print("priv_key = " + str(priv_key))
     cipher = Cipher(int(priv_key['N']), int(priv_key['p']), int(priv_key['q']))
+    #print("got cipher.")
+    #print("priv_key['f'] = " + str(priv_key['f']))
+    #print(str(priv_key['f'][::-1]))
     cipher.f_poly = Poly(priv_key['f'].astype(np.int)[::-1], x).set_domain(ZZ)
+    #print("got f_poly.")
     cipher.f_p_poly = Poly(priv_key['f_p'].astype(np.int)[::-1], x).set_domain(ZZ)
+    #print("got f_p_poly.")
     if bin_input:
         k = int(math.log2(cipher.q))
         pad = k - len(input_arr) % k
@@ -63,14 +134,27 @@ def decrypt(priv_key_file, input_arr, bin_input=False):
     return cipher.decrypt(Poly(input_arr[::-1], x).set_domain(ZZ)).all_coeffs()[::-1]
 
 
+def invalid_ciphertext(ct1, ct2):
+    return len(ct1)!=len(ct2) or div(mpfr(str(int(ct1, 16))),mpfr((str(int(ct2, 16))))) != 1.0
+
+def get_password():
+    with open("password.txt") as file:
+        password = "".join(file.readlines()).strip()
+    return password
+
 def main():
-    root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler(sys.stdout)
+
+    # Start by getting password
+    password = get_password()
+    #print("The password is " + str(password))
+    #root = logging.getLogger()
+    gmpy2.get_context().precision=1000
+    #root.setLevel(logging.DEBUG)
+    #ch = logging.StreamHandler(sys.stdout)
     #ch.setLevel(logging.DEBUG)
     #ch.setLevel(logging.INFO)
-    ch.setLevel(logging.WARN)
-    root.addHandler(ch)
+    #ch.setLevel(logging.WARN)
+    #root.addHandler(ch)
 
     #poly_input = False
     #poly_output = False
@@ -81,49 +165,72 @@ def main():
     print("people are thinking of attacking cryptosystems with them.")
     print("So I found this awesome cryptosystem that is safe from")
     print("quantums! You can send as many qubits as you like at this")
-    print("cipher, and none of them will quantum break it (although")
-    print("that was a fun game). Here is a proof of concept to show")
-    print("the world how robust our cryptosystem is. \n")
+    print("cipher, and none of them will break it. Here is a proof of")
+    print("concept to show the world how robust our cryptosystem is.")
+    print("I\'ve encrypted a password and no amount of skullduggery")
+    print("will help you to get it back. See, you can encrypt and")
+    print("decrypt all you want, you won\'t get anywhere!")
 
-    print("   Send us a command and its encrypted version, and we")
-    print("will reply with words of praise.\n")
+    private_key, public_key = generate(N=167, p=3, q=128)#, priv_key_file=priv_key_file, pub_key_file=pub_key_file)
+    print("   This is an asymmetric cryptosystem so here is the public")
+    print("key:\n")
+    print(str(public_key) + "\n")
+    pwd_ct = encrypt_command(password.encode(), public_key)
+    print("   The password ciphertext is " + pwd_ct + "\n")
+    print("\n   Have at it!\n")
 
     while True:
-        print("Usage: ")
-        print("   encrypt <command>")
-        print("   execute <ciphertext> <command>")
+        print("/------------------------------\\")
+        print("|           COMMANDS           |")
+        print("|                              |")
+        print("|   encrypt <plaintext>        |")
+        #print("   execute <ciphertext> <command>")
+        print("|   decrypt <ciphertext>       |")
+        print("|   solve_challenge <password> |")
+        print("|   exit                       |")
+        print("\\------------------------------/")
         sys.stdout.flush()
         parts = sys.stdin.readline()[:-1].split(" ")
 
         try:
             if parts[0] == "encrypt":
-                spell = parts[1]
-                print(encrypt_command(bytes.fromhex(spell)))
+                pt = parts[1]
+                #print("About to encrypt.")
+                print(encrypt_command(bytes.fromhex(pt), public_key))
+                #print("command encrypted.")
                 sys.stdout.flush()
-            elif parts[0] == "execute":
-                ct = bytes.fromhex(parts[1])
-                command = bytes.fromhex(parts[2])
-                if command not in decrypt_command(ct):
+            elif parts[0] == "decrypt":
+                ct = parts[1]
+                #print("ct = " + str(ct))
+                #print("   ct class = " + str(ct.__class__))
+                #print("pwd_ct = " + str(pwd_ct))
+                #print("   pwd_ct_class = " + str(pwd_ct.__class__))
+                if ct == pwd_ct:
+                    print("Hey, you tried to decrypt the password ciphertext. That's illegal.")
+                    sys.stdout.flush()
                     raise Exception()
-                if command == b"cat flag.txt":
-                    print("encrypted command: " + encrypt_command(command))
-                    print("ciphertext: " + str(parts[1]))
-                    if encrypt_command(command) == parts[1]: # ct
-                        print("Hey, you tried to run a forbidden command.")
-                        sys.stdout.flush()
-                        raise Exception()
-                    else:
-                        print("What?! How did you do that??")
-                        with open("flag.txt") as file:
-                            print("".join(file.readlines()))
                 else:
-                    print("Your command was valid! We executed it and you are awesome :)\n")
-                sys.stdout.flush()
-            elif parts[0] in ["quit", "exit"]:
+                    #command = bytes.fromhex(parts[2])
+                    decrypted = decrypt_command(bytes.fromhex(ct),private_key)
+                    print("Decrypted ciphertext: " + str(decrypted))
+                #if command not in decrypt_command(ct, private_key) or invalid_ciphertext(encrypt_command(command, public_key), parts[1]):
+                #    raise Exception()
+            elif parts[0] == "solve_challenge":
+                candidate_password = parts[1]
+                #print("candidate_password = " + str(candidate_password))
+                #print("   with class " + str(candidate_password.__class__))
+                #print("password = " + str(password))
+                #print("   with class " + str(candidate_password.__class__))
+                if candidate_password == password:
+                    print("What?! How did you do that??")
+                    with open("flag.txt") as file:
+                        print("".join(file.readlines()))
+            elif parts[0] == "exit":
                 print("Bye!")
                 sys.stdout.flush()
                 return
             else:
+                print("Unknown command.")
                 raise Exception()
         except:
             print("Something went wrong...")
