@@ -1,4 +1,12 @@
-## OSIRIS Constellation
-We have a bunch of packets, from Xi -> Yi, with timestaps, each showing the destination between Xi, Yi (and each of these ip's correspond to a satelite in this constellation). And we have so many of these over a long time, so we can for say time t : t+dt have an estimate of where each satelite is if we parse through the PCAPs, order them through time, and solve a system of equations (with say, scipy or some generic guess, and make it better gradually, or even optimization libs) to get the coordinates of satelites. </br>
+# Constela
+## Description
+Stuff will come here
 
-We then plot these coordinates, over time, to see an animation. To see the animation, run "poc.py". Can you get the flag?
+## Solution
+The data has been exfiltrated using DNS. We extract out all the suspicious looking packets and find that the data is base64 encoded.
+
+Taking the data and joining every pair of suspicious website and decoding it, we get some GPS coordinates.
+
+Plotting the latitude and altitude gives us a QR code when scanned gives us the flag.
+
+The final solver script that does everything is `solve.py`.
