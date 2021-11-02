@@ -1,9 +1,13 @@
+
 #include<sys/types.h>
 #include<sys/stat.h>
+#include<sys/mman.h>
+#include<sys/unistd.h>
 #include<stdio.h>
 #include<fcntl.h>
 #include<stdint.h>
-
+#include<string.h>
+#include<stdlib.h>
 uint64_t page=0x1000;
 uint8_t *code=0;
 uint8_t *data=0;
@@ -12,11 +16,18 @@ uint64_t pc=0;
 int64_t FLAG=0;
 uint8_t * ReadOnly=0;
 void * PTR=0;
+void die(char *s){
+	printf("%s\n",s);
+	exit(1);
+}
+void register_index(uint64_t idx){
+	if(idx>=0x10)
+		die("segfault");
+}
 
 void segfault(uint64_t p, uint64_t move){
-	if( p + move >=page && p>=0x1000))
+	if( p + move >=page && p>=0x1000)
 		die("segfault");
-	return 1;
 }
 uint8_t get_byte(){
 	uint8_t res=0;
@@ -30,27 +41,28 @@ uint64_t get_regs_idx(){
 	return res;
 }
 uint16_t get_word(){
-	uint16_t *res=0;
+	uint16_t res=0;
 	segfault(pc,2);
-	res=(uint16_t*)code[pc];
+	res=*(uint16_t *)&code[pc];
 	pc+=2;
-	return *res;
+	return res;
 }
 uint32_t get_dword(){
-	uint32_t *res=0;
+	uint32_t res=0;
 	segfault(pc,4);
-	res=(uint32_t*)code[pc];
+	res=*(uint32_t*)&code[pc];
 	pc+=4;
-	return *res;
+	return res;
 }
 uint64_t get_qword(){
-	uint64_t *res=0;
+	uint64_t res=0;
 	segfault(pc,8);
-	res=(uint64_t*)code[pc];
+	res=*(uint64_t*)&code[pc];
 	pc+=8;
-	return *res;
+	return res;
 }
 void setflag(uint64_t a,uint64_t b){
+
 	if(a>b)
 		FLAG=1;
 	else if(a==b)
@@ -58,14 +70,7 @@ void setflag(uint64_t a,uint64_t b){
 	else
 		FLAG=-1;
 }
-void register_index(uint64_t idx){
-	if(idx>=0x10)
-		die("segfault");
-}
-void die(char *s){
-	printf("%s\n",s);
-	exit(1);
-}
+
 void init(){
 	setvbuf(stdin,0,2,0);
 	setvbuf(stdout,0,2,0);
@@ -76,7 +81,7 @@ void init(){
 	int f=open("/dev/urandom",O_RDONLY);
 	if(f<=0)
 		die("init");
-	read(f,&buf,8);
+	read(f,&buf,5);
 	buf = (long unsigned int)buf & 0xfffffffffffff000;
 	mmap((void *)buf,0x3000,3,0x22,0,0);
 	close(f);
@@ -85,7 +90,7 @@ void init(){
 	ReadOnly =  data + page;
 }
 void load(){
-	int f = open("./game",O_RDONLY);
+	int f = open("./CSAW-GAME",O_RDONLY);
 	uint64_t p1 = read(f,code,0x1000);
 	uint64_t p2 = read(f,ReadOnly,0x1000);
 	if( p1 != 0x1000 || p2 !=0x1000)
@@ -131,28 +136,29 @@ void SUB(uint8_t c){
 	{	
 		case 0://reg - reg
 			arg2=get_regs_idx();
-			regs[arg1]-=regs[arg2];
 			setflag(regs[arg1],regs[arg2]);
+			regs[arg1]-=regs[arg2];
 			break;
 		case 1://reg - 1 byte
 			arg2=(uint64_t)get_byte();
-			regs[arg1]-=arg2;
 			setflag(regs[arg1],arg2);
+			regs[arg1]-=arg2;
 			break;
 		case 2://reg - 2 bytes
 			arg2=(uint64_t)get_word();
-			regs[arg1]-=arg2;
 			setflag(regs[arg1],arg2);
+			regs[arg1]-=arg2;
 			break;
 		case 3://reg - 4 bytes
 			arg2=(uint64_t)get_dword();
-			regs[arg1]-=arg2;
 			setflag(regs[arg1],arg2);
+			regs[arg1]-=arg2;
 			break;
-		case 4://reg - 4 bytes
+		case 4://reg - 8 bytes
 			arg2=get_qword();
-			regs[arg1]-=arg2;
+			printf("%p %p\n",regs[arg1],arg2);
 			setflag(regs[arg1],arg2);
+			regs[arg1]-=arg2;
 			break;
 	}
 }
@@ -176,10 +182,8 @@ void XOR(){
 	regs[arg1] ^= regs[arg2];
 }
 void JMP(uint8_t c){
-	uint64_t arg1=0;
-	uint16_t * tmp=get_word();
-	arg1=(uint64_t)*tmp;
-	segfault(pc,arg1);
+	uint64_t arg1=get_word();
+
 	c-=17;
 	switch(c)
 	{
@@ -204,7 +208,7 @@ void JMP(uint8_t c){
 		default:
 			return;
 	}
-	pc += arg1;
+	pc = arg1;
 	return;
 }
 void DEC(){
@@ -242,11 +246,13 @@ void NOT(){
 }
 void MOV(uint8_t c){
 	c-=27;
+
 	uint64_t arg1=get_regs_idx();
 	uint64_t arg2=0;
 	switch(c)
 	{
 		case 0://reg reg
+
 			arg2=get_regs_idx();
 			regs[arg1]=regs[arg2];
 			break;
@@ -289,10 +295,12 @@ void MOV(uint8_t c){
 	}
 
 }
-void do_push(uint64_t data){
+void do_push(uint64_t vul){
 	segfault(regs[15],-8);
-	*(data+regs[15]) = data; 
 	regs[15]-=8;
+	*(uint64_t *)&(data[regs[15]]) = vul;
+
+	
 }
 void PUSH(){
 	uint64_t arg1=get_regs_idx();
@@ -300,18 +308,21 @@ void PUSH(){
 }
 uint64_t do_pop(){
 	segfault(regs[15],8);
-	uint64_t res = *(uint64_t *)data[regs[15]];
+	uint64_t res = *(uint64_t *)&data[regs[15]];
 	regs[15] += 8;
+
 	return res;
 }
 void POP(){
+
 	uint64_t arg1=get_regs_idx();
+
 	regs[arg1] = do_pop();
 }
 void CALL(uint8_t c){
 	c-=38;
 	uint64_t arg1=0;
-	if(c){
+	if(!c){
 		arg1=get_regs_idx();
 		do_push(pc);
 		pc = regs[arg1];
@@ -346,7 +357,7 @@ uint64_t readint()
 void IN(uint8_t c){
 	c-=41;
 	uint8_t arg1;
-	uint64_t num=0;
+	uint64_t num,len=0;
 	switch(c){
 		case 0:// read reg
 			arg1= get_regs_idx();
@@ -372,21 +383,21 @@ void OUT(uint8_t c){
 		case 0:
 			arg1 = regs[0x5];
 			segfault(arg1,1);
-			write(1,data[arg1],1);
+			write(1,&data[arg1],1);
 			break;
 		case 1:// for write RO data.
 			arg1 = regs[0x5];
 			segfault(arg1,1);
-			printf("%s\n",ReadOnly[arg1]);
+			printf("%s\n",&ReadOnly[arg1]);
 			break;
 		case 2:
 			arg1 = get_byte();
 			segfault(arg1,1);
-			write(1,data[arg1],1);
+			write(1,&data[arg1],1);
 			break;
 		case 3:
 			arg1 = get_regs_idx();
-			write(1,regs[arg1],8);
+			write(1,&regs[arg1],8);
 			break;
 	}
 }
@@ -406,13 +417,13 @@ void STORE(uint8_t c){
 		    arg1 = get_regs_idx();
 		    arg2 = get_regs_idx();
 			segfault(regs[arg1],8);
-			memcpy(data[regs[arg1]],regs[arg2],8);
+			memcpy(&data[regs[arg1]],&regs[arg2],8);
 			break;
 		case 2:
 		    arg1 = get_regs_idx();
 		    arg2 = get_dword();
 			segfault(regs[arg1],4);
-			memcpy(data[regs[arg1]],arg2,4);
+			memcpy(&data[regs[arg1]],&arg2,4);
 			break;
 		case 3:
 			break;
@@ -423,23 +434,27 @@ void LOAD(uint8_t c)
 	c-=52;//0x34
 	uint64_t arg1 = get_regs_idx();
 	uint64_t arg2 = get_regs_idx();
-	memset(regs[arg1],0,8);//warning
+	if(arg1!=arg2)
+		memset(&regs[arg1],0,8);//warning
 	switch(c){
 		case 0:
 			segfault(regs[arg2],regs[arg2]+1);
-			memcpy(regs[arg1],data[regs[arg2]],1);
+			memcpy(&regs[arg1],&data[regs[arg2]],1);
 			break;
 		case 1:
 			segfault(regs[arg2],regs[arg2]+2);
-			memcpy(regs[arg1],data[regs[arg2]],2);
+			memcpy(&regs[arg1],&data[regs[arg2]],2);
 			break;
 		case 2:
+			
 			segfault(regs[arg2],regs[arg2]+4);
-			memcpy(regs[arg1],data[regs[arg2]],4);
+			memcpy(&regs[arg1],&data[regs[arg2]],4);
 			break;
 		case 3:
 			segfault(regs[arg2],regs[arg2]+8);
-			memcpy(regs[arg1],data[regs[arg2]],8);
+
+			memcpy(&regs[arg1],&data[regs[arg2]],8);
+
 			break;
 			
 	}
@@ -449,21 +464,21 @@ void Test()
 	uint64_t arg1 = get_regs_idx();
 	if(regs[arg1]==0)
 		FLAG=1;
-	else:
+	else
 		FLAG=0;
 }
 void play()
 {
 	uint64_t arg1 = regs[4];
-	ptr=malloc(arg1);
+	PTR=malloc(arg1);
 	puts("Content:");
-	read(0,ptr,arg1);
+	read(0,PTR,arg1);
 }
 void do_free()
 {
-	if(ptr)
-	free(ptr);
-	ptr=0;
+	if(PTR)
+	free(PTR);
+	PTR=0;
 }
 void run()
 {
@@ -472,40 +487,52 @@ void run()
 		cmd=get_byte();
 		switch(cmd){
 			case 0:
+				//puts("NOP");
 				NOP();break;
 			case 1:
 			case 2:
 			case 3:
 			case 4:
 			case 5:
+				//puts("ADD");
 				ADD(cmd);break;//1,2,4,8
 			case 6:
 			case 7:
 			case 8:
 			case 9:
 			case 10:
+				//puts("SUB");
 				SUB(cmd);break;
 			case 11:
+				//puts("MUL");
 				MUL();break;
 			case 15:
+				//puts("DIV");
 				DIV();break;
 			case 16:
+				//puts("XOR");
 				XOR();break;
 			case 17:
 			case 18:
 			case 19:
 			case 20:
 			case 21:
+				//puts("JMP");
 				JMP(cmd);break;// jmp je jne jg jl
 			case 22:
+				//puts("OR");
 				OR();break;
 			case 23:
+				//puts("AND");
 				AND();break;
 			case 24:
+				//puts("NOT");
 				NOT();break;
 			case 25:
+				//puts("INC");
 				INC();break;
 			case 26:
+				//puts("DEC");
 				DEC();break;
 			case 27:
 			case 28:
@@ -516,49 +543,64 @@ void run()
 			case 33:
 			case 34:
 			case 35:
+				//puts("MOV");
 				MOV(cmd);break;
 			case 36:
+				//puts("PUSH");
 				PUSH();break;
 			case 37:
+				//puts("POP");
 				POP();break;
 			case 38:
 			case 39:
+				//puts("CALL");
 				CALL(cmd);break;
 			case 40:
+				//puts("RET");
 				RET();break;
 			case 41:
 			case 42:
 			case 43:
+				//puts("INPUT");
 				IN(cmd);break;
 			case 44:
 			case 45:
 			case 46:
 			case 47:
+				//puts("OUT");
 				OUT(cmd);break;
 			case 48:
 			case 49:
 			case 50:
 			case 51:
+				//puts("STORE");
 				STORE(cmd);break;
 			case 52:
 			case 53:
 			case 54:
 			case 55:
+				//puts("LAOD");
 				LOAD(cmd);break;
 			case 56:
+				//puts("TEST");
 				Test();break;
 			case 57:
-				play();
+				//puts("PLAY");
+				play();break;
 			case 58:
+				//puts("FREE");
 				do_free();
+				break;
 			case 0xff:
 				die("EXT");
+
 			default:
 				die("OP");
 		}
 	}
 }
 int main(){
+
 	init();
 	load();
 	run();

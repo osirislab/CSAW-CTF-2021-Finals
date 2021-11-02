@@ -3,7 +3,7 @@
 #04 rsi \ 05 rdi 
 #gadget
 from pwn import *
-head =b"\x24\x0e\x23\x0e\x0f"
+head =b"\x24\x0e\x1b\x0e\x0f"
 leave_ret=b'\x1b\x0f\x0e\x25\x0e\x28'
 PUTS=b'\x2d'
 def store_a_number(offset,num):
@@ -23,18 +23,16 @@ def load_varible_from_stack(offset,regs,length=4):#mov     edx, [rbp+var_4]
 		res= f'\x07\x0e{chr(offset)}\x37{chr(regs)}\x0e\x02\x0e{chr(offset)}'.encode()
 	return res
 def jmp(t,gap):
-	if(gap<0):
-		gap=0x10000-(-gap)
-	h = chr(gap >>0x8)
-	l = chr(gap % 0x100)
 	if t == 'jmp':
-		return f'\x11{h}{l}'.encode()
+		return b'\x11'+p16(gap)
 	elif t =='jz':
-		return f'\x12{h}{l}'.encode()
+		return b'\x12'+p16(gap)
 	elif t=='ja':
-		return f'\x14{h}{l}'.encode()
+		print("Hit")
+		return b'\x14'+p16(gap)
 	elif t=='jnz':
-		return f'\x13{h}{l}'.encode()
+		return b'\x13'+p16(gap)
+	
 def add_regs(reg1,reg2):
 	return f'\x01{chr(reg1)}{chr(reg2)}'.encode()
 def deref_reg(reg1,reg2,length=1):
@@ -55,11 +53,12 @@ def read_int():
 def mov_qword(reg,num):
 	return f"\x1f{chr(reg)}{chr(num)}".encode()
 def cmp_reg_num(reg,num):
-	return f'\x08{chr(reg)}{chr(num)}'.encode()
+	return b'\x08'+p8(reg)+p16(num)
+
 def cmp_reg_large_num(reg,num):
 	return b'\x0a'+p8(reg)+p64(num)
 def call(address):
-	return f'\x27{chr(address)}'.encode()
+	return b'\x27'+p16(address)
 
 RO=b''
 LengthOfMessage=len(RO)
@@ -86,7 +85,17 @@ RO+=b"                                                                 \n"
 
 
 data =b''
-# puts
+# main #0
+data+=head
+data+=set_reg(0,0)
+data+=call(272)#logo
+data+=set_reg(0,0)
+data+=call(236)#vul
+data+=set_reg(0,0)
+data+=b"\xFF"
+# main end
+print("Function PUTS:",len(data))
+# puts #
 data+=head
 data+=sub_rsp(0x20)
 data+=b"\x1b\x00\x0e\x07\x00\x18\x31\x00\x05"
@@ -94,26 +103,27 @@ data+=b'\x1c\x05\x00'
 data+=store_a_number(4,0)
 
 pin_0 = len(data)
+print(" Pin_0:",len(data))
 data+=load_varible_from_stack(4,3,4)
 data+=load_varible_from_stack(18,0,8)
 data+=add_regs(0,3)
 data+=deref_reg(0,0,1)
 data+=test_reg(0)
-
 pin_1 = len(data)+3
-
-data+=jmp('jz',42)#caled
+print(" Pin_1:",len(data))
+data+=jmp('jz',116+3)#
 data+=load_varible_from_stack(4,3,4)
 data+=load_varible_from_stack(18,0,8)
 data+=add_regs(0,3)
 data+=do_write(0)
 data+=varible_add(4,1,4)
 pin_2 = len(data)+3
-#print(pin_2-pin_1)
-data+=jmp("jmp",pin_2-pin_0)
+print(" Pin_2:",len(data))
+data+=jmp("jmp",50)
 data+=leave_ret
 # puts end
-pin_add=len(data)
+pin_add =len(data)
+
 # add
 data+=head
 data+=sub_rsp(0x10)
@@ -123,61 +133,57 @@ data+=set_reg(0x0,0)
 data+=read_int()
 data+=store_value_to_varible(4,0,4)
 data+=cmp_reg_num(0,0x887)
-pin_3 = len(data)+3
-data+= jmp('ja',15)#caled
+data+= jmp('ja',172)#
 data+= load_varible_from_stack(4,0,4)
 data+= b'\x1b\x04\x00'
 data+= b'\x39\x3a'
-#pin_4= len(data)
-#print(pin_4-pin_3)
+pin_4= len(data)
+print("Pin_4:",len(data))
 data+=leave_ret
 # add end
+
+
 pin_check=len(data)
 #check
 data+=head
 data+=sub_rsp(0x30)
-data+=b'\x1b\x00\x04\x07\x00\x30'#lea     rax, [rbp+buf]
+data+=b'\x1b\x00\x0e\x07\x00\x30'#lea     rax, [rbp+buf]
 data+=b'\x1b\x05\x00\x1c\x04\x48\x2b'# read(0,rax,0x48)
-data+=load_varible_from_stack(0x30,0,4)#lea     rax, [rbp+buf]
+data+=load_varible_from_stack(0x30,0,8)#lea     rax, [rbp+buf]
+data+=b'\x00\x00\x00'
 data+=cmp_reg_large_num(0,0xdeadbeefcafebabe)
 data+=set_reg(0,1)
-data+=jmp('jz',3)
+data+=jmp('jz',230)
 data+=set_reg(0,0)
+print(" pin_5",len(data))
 data+=leave_ret
 #check end
-pin_vul=len(data)
+print("Function Vul:",len(data))
 #vul
 data+=head
 pin_5=len(data)
 data+=set_reg(0,0)
-data+=call(pin_add)
+data+=call(pin_add)#add
 data+=set_reg(0x5,Escape)
 data+=PUTS
 data+=set_reg(0x0,0)
+print(" Pin_6",len(data))
 data+=call(pin_check)
 data+=test_reg(0)
 pin_6=len(data)+3
-data+=jmp('jnz',pin_5-pin_6)
+data+=jmp('jnz',pin_5)
 data+=set_reg(0x5,Out_there)
 data+=PUTS
 data+=leave_ret
 #vul end
-pin_logo=len(data)
+print("Function logo:",len(data))
+#print(pin_logo)
 #logo 
 data+=head
 data+=set_reg(0x5,Logo_add)
 data+=PUTS
 data+=leave_ret
 #logo end
-# main
-data+=head
-data+=set_reg(0,0)
-data+=call(pin_logo)
-data+=set_reg(0,0)
-data+=call(pin_vul)
-data+=set_reg(0,0)
-data+=leave_ret
-# main end
 
 
 with open("./CSAW-GAME",'wb') as f:
