@@ -1,0 +1,13 @@
+{
+    "name": "Malicious Solaris Download",
+    "category": "ics",
+    "author": "",
+    "description": "Attached is a malicious firmware updater package (blackthorn_fw_updater.msi) for some of legacy Solaris equipment. The package contains an ELF file that sends and modifies IEC104 traffic.\n\nFrom the network traffic observed in iec104.pcap, it looks like it's just polling the controller for certain fields periodically, but the firmware does have the ability to change values at some point.\n\n Can you figure out what IOA it tries to change, and what value it sets it to?\n\n Note: flag format: IOA=Value, e.g. 101=0xaabbccdd",
+    "flag": "flag{403=0x2042d473}",
+    "type": "dynamic",
+    "initial": 500,
+    "minimum": 50,
+    "decay": 275,
+    "files": ["blackthorn_fw_updater.msi", "iec104.pcap"],
+    "box": "misc.chal.csaw.io"
+  }
