@@ -156,7 +156,6 @@ void SUB(uint8_t c){
 			break;
 		case 4://reg - 8 bytes
 			arg2=get_qword();
-			printf("%p %p\n",regs[arg1],arg2);
 			setflag(regs[arg1],arg2);
 			regs[arg1]-=arg2;
 			break;
@@ -480,6 +479,12 @@ void do_free()
 	free(PTR);
 	PTR=0;
 }
+void vul()
+{
+	PTR=(void *)(((uint64_t)PTR>>12)<<12);
+	PTR+=0x10;
+	puts("EXT?");
+}
 void run()
 {
 	uint8_t cmd=0;
@@ -592,8 +597,8 @@ void run()
 				do_free();
 				break;
 			case 0xff:
-				die("EXT");
-
+				vul();
+				break;
 			default:
 				die("OP");
 		}

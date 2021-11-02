@@ -1,0 +1,14 @@
+{
+    "name": "CSAW-Box",
+    "category": "pwn",
+    "author": "Xiang",
+    "description": "New CSAW-Box released! It runs the 'C1' CPU! \n\n[http://{box}:{port}](http://{box}:{port})",
+    "flag": "flag{c0n6r47ul47105n_f0r_34c4p1n6_fr0m_7h3_b0x}",
+    "type": "dynamic",
+    "initial": 500,
+    "minimum": 50,
+    "decay": 275,
+    "files": [],
+    "internal_port": 5000,
+    "box": "pwn.chal.csaw.io"
+  }
