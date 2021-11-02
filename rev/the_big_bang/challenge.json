@@ -2,7 +2,7 @@
   "name": "The Big Bang",
   "category": "rev",
   "author": "mastertg, amitz800",
-  "description": "What do you think about the number 73? \n\n[http://{box}:{port}](http://{box}:{port})",
+  "description": "Do you have a favourite number? \nI do! \n\n[http://{box}:{port}](http://{box}:{port})",
   "flag": "flag{5h3ld0n_54y5_7h47_7h3_b357_numb3r_1n_7h3_w0rld_15_73,_h3_15_r16h7!!}",
   "type": "dynamic",
   "initial": 500,
