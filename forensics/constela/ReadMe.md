@@ -1,6 +1,7 @@
 # Constela
 ## Description
-Stuff will come here
+The year is 7331, and BadCorp rules the galaxy with it's omnipresent satelites. But recently a resistance movement led by a band of hackers calling themselves the OSIRIS has hacked into BadCorp systems, they have taken over the satelites and it is believed they are trying to send a message across the galaxy... </br>
+Can humanity _see_ their message?
 
 ## Solution
 The data has been exfiltrated using DNS. We extract out all the suspicious looking packets and find that the data is base64 encoded.
