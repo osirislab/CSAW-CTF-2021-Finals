@@ -138,7 +138,7 @@ int main(int argc, const char **argv, const char **envp)
         //puts("-------------------------------------------------------------------");
         puts("\nProceeding to the challenge...\n");
         fflush(stdout);
-	printf("Main is at %x\n", **(main));
+	printf("Main is at %lx\n", **(main));
         runChallenge();
     }else{
         printf("Incorrect password. :(\n");
