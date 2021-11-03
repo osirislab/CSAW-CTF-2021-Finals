@@ -1,0 +1,21 @@
+{
+    "name": "sfc",
+    "category": "forensics",
+    "author": "Iman",
+    "description": "Compile with: \n\niverilog -g2012 -o nco ncore_tb.v",
+    "flag": "flag{d0nT_mESs_wiTh_tHe_sChLAmi}",
+    "box": "misc.chal.csaw.io",
+    "type": "dynamic",
+    "initial": 500,
+    "minimum": 50,
+    "decay": 275,
+    "files": [
+        "ncore_tb.v"
+    ]
+  }
+  
+
+
+
+
+
