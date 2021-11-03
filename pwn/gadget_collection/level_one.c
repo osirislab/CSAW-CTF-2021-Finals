@@ -72,13 +72,15 @@ int foo8(void) {
 
 int foo9(void) {
 	asm volatile(
-		"int $0x80"
+		"int $0x80\n"
+		"ret\n"
 	);
 }
 
 int foo10(void) {
 	asm volatile(
-		"syscall"
+		"syscall\n"
+		"ret\n"
 	);
 }
 
