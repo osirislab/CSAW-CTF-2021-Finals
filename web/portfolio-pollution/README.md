@@ -35,3 +35,12 @@ I'd also love to hear about any unintended solutions or functionality you might 
     <br><br>
     For now this seems to work, but it's something I'll keep an eye on. A more robust solution would require separate instances for each player which should be avoided if possible.
 </details>
+
+## Comment
+It took me 1 hour to solve, mainly because I wasn't familiar with how prototype pollution worked and how it affected xss. Searching for known vulnerabilities of imports got me to it. The comment in the sanitize function was a good hint.
+
+Chaining the vulnerabilities was very enjoyable, when you figure it out.
+
+I had to guess that there might be vulnerabilities in the imports. I also got a little stuck on the double encoding part, and just tried it out and it worked. It is pretty straightforward otherwise.
+
+For the Potential Issues, I was just wondering if there could be some race conditions created by clearing of prototype, causing confusion in players. It won't matter if the server only serves one request at a time, or if they're fast enough to not interfere.

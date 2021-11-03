@@ -3,7 +3,7 @@
   "category": "crypto",
   "author": "mastertg",
   "description": "",
-  "flag": "flag{5up3r_53cr37_p455w0rd}",
+  "flag": "flag{}",
   "type": "dynamic",
   "initial": 500,
   "minimum": 50,
