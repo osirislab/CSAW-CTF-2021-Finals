@@ -22,17 +22,17 @@ server = remote(host, port)
 def encrypt_message(msg):
 	server.send(" ".join(["encrypt", msg.hex()]) + "\n")
 	server.recvline()
-	ct = server.recvuntil("\n").strip()
+	ct = server.recvuntil(b"\n").strip()
 	#print("encrypt_message: ct = " + str(ct))
-	server.recvuntil("\n> ")
+	server.recvuntil(b"\n> ")
 	return ct
 
 def decrypt(ct):
 	server.send(b" ".join([b"decrypt", ct])+b"\n")
 	server.recvline()
-	pt = server.recvuntil("\n").decode()
+	pt = server.recvuntil(b"\n").decode()
 	#print("plaintext = " + str(pt))
-	server.recvuntil("\n> ")
+	server.recvuntil(b"\n> ")
 	return(pt)
 
 # Adds exactly one to what presumably is a low-order byte of some ciphertext (i.e. in the padding somewhere)
@@ -46,10 +46,10 @@ def increment_ct_byte(ct, offset_from_end):
 	return new_ct
 
 def main():
-	server.recvuntil("The password ciphertext is ")
-	pwd_ct = server.recvuntil("\n").strip()
+	server.recvuntil(b"The password ciphertext is ")
+	pwd_ct = server.recvuntil(b"\n").strip()
 	print("pwd_ct = " + str(pwd_ct))
-	server.recvuntil("\n> ")
+	server.recvuntil(b"\n> ")
 
 	new_ct = increment_ct_byte(ct=pwd_ct, offset_from_end=2)
 	print("Old ct = " + str(pwd_ct))

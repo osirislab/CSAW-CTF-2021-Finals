@@ -4,22 +4,23 @@ import matplotlib.pyplot as plt
 
 cap = pyshark.FileCapture('constela.pcapng')
 data = []
+invalid_data = ['connectivity-check.ubuntu', 'nordstrom', 'yelp', 'craigslist.org', 'cnbc']
 c = -1
 
-for i in range(6072):
+for i in range(13745):
+	if i%1000 == 0:
+		print("Analyzed",i,"packets!")
 	try:
 		if cap[i]['DNS'].flags == '0x00008183': # these are the packets containing data
 				value = str(cap[i]['DNS'].qry_name).replace('.com','').replace('.cable.rcn','')
 				if c > -1:
-					if value == data[c] or value == 'connectivity-check.ubuntu':
+					if value == data[c] or value in invalid_data:
 						continue
 					else:
 						data.append(value)
-						#print(value)
 						c += 1
 				else:
 					data.append(value)
-					#print(value)
 					c += 1
 	except:
 		continue
@@ -38,8 +39,7 @@ for co in actual_data:
 	x.append(float(arr[2]))
 	y.append(float(arr[4]))
 	z.append(float(arr[9]))
-	#print(x[-1],y[-1],z[-1])
 
 # Creating image
-plt.scatter(x,z,color = "green", marker="s",s = 140, alpha=1.)
+plt.scatter(x,z,color = "black", marker="s",s = 140, alpha=1.)
 plt.show()
