@@ -2,8 +2,8 @@ from pwn import remote, process
 
 host = "localhost" #"crypto.chal.csaw.io"
 port = 5000 # 5009
-#server = remote(host, port)
-server = process('python3 ./server.py', shell=True)
+server = remote(host, port)
+#server = process('python3 ./server.py', shell=True)
 
 def get_pubkey():
 	server.recvuntil(b"key:\n\n")
@@ -20,7 +20,7 @@ def get_pubkey():
 def bitflipper(ct):
 	ct_int = int(ct,16)
 	num_bits = len(bin(ct_int))
-	for i in range(num_bits):
+	for i in range(16): #for i in range(num_bits):
 		server.recvuntil(b"\n> ")
 		new_ct = ct_int ^ (1<<i)
 		string_to_send = " ".join(["decrypt", hex(new_ct)[2:]])
