@@ -9,6 +9,10 @@ it's a chat server, go pwn it. enough said
 
 ```
 
+# Author's notes
+
+This is a Windows heap pwn challenge. I feel like many CTF players are not exposed to Windows before so this will be an interesting challenge for them.
+
 Attached binaries: contents of `public/` . Remote's `ws2_32.dll` and `kernel32.dll` should be provided too to help the CTF players.
 **Ideally,** we would give them the VM image too so they can test locally against the exact same environment as remote.
 
@@ -17,6 +21,8 @@ Difficulty: Hard, about 500 points.
 # Deployment notes
 
 The server itself is the pwnable, so each team should have its own instance of the server. Crashing the server is expected so each instance should auto-restart immediately.
+
+If you solve the challenge, there is the possibility of doing some shenanigans like shutting down the VM, so we should hope that the solving teams will respect the sportsmanship.
 
 # Vulnerabilities
 
