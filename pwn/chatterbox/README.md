@@ -26,6 +26,8 @@ The server itself is the pwnable, so each team should have its own instance of t
 
 If you solve the challenge, there is the possibility of doing some shenanigans like shutting down the VM, so we should hope that the solving teams will respect the sportsmanship.
 
+**Flag should be in C:\flag.txt and be world-readable.**
+
 # Vulnerabilities
 
 1. Heap overflow, attacker can write arbitrarily far out of bounds of a chunk of size 1024 bytes
