@@ -1,0 +1,1 @@
+Sorry, but your flag is in another box! nc localhost 11004 and use password 0c45b7fd3abb1dbd5efd0e079314c970
