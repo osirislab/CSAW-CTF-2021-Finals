@@ -22,6 +22,8 @@ Difficulty: Hard, about 500 points.
 
 The server itself is the pwnable, so each team should have its own instance of the server. Crashing the server is expected so each instance should auto-restart immediately.
 
+**Solving the challenge requires spraying many connections to the daemon. So every team needs to be on its own instance.**
+
 If you solve the challenge, there is the possibility of doing some shenanigans like shutting down the VM, so we should hope that the solving teams will respect the sportsmanship.
 
 # Vulnerabilities
