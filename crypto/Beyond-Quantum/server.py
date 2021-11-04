@@ -78,7 +78,7 @@ def main():
     print("will help you to get it back. See, you can encrypt and")
     print("decrypt all you want, you won\'t get anywhere!")
 
-    private_key, public_key = generate(N=167, p=3, q=128)
+    private_key, public_key = generate(N=97, p=3, q=128)
     print("   This is an asymmetric cryptosystem so here is the public")
     print("key:\n")
     print(str(public_key) + "\n")
