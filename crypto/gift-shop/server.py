@@ -73,6 +73,7 @@ def equal_bytearrays(a1, a2):
 
 def pad(pt):
     pad_value = 16 - len(pt)%16
+    print("During padding: used a pad value of " + str(pad_value))
     pt = pt + (chr(pad_value)*pad_value).encode()
     return pt
 
@@ -116,7 +117,17 @@ def decrypt(ct):
         ct = ct[16:]
         cipher = AES.new(key, AES.MODE_CBC, iv)
         pt = cipher.decrypt(ct)
-        #print(b"In decrypt: pt = " + pt)
+        print(b"In decrypt: pt = " + pt)
+        for i in range(len(pt)//16):
+            print(pt[16*i:(16+16*i)])
+        #print(pt[:16])
+        #print(pt[16:32])
+        #print(pt[32:48])
+        #print(pt[48:64])
+        #print(pt[64:80])
+        #print(pt[80:96])
+        #print(pt[96:112])
+        #print(pt[112:])
         return pt
 
 def decrypt_and_verify(ct):
@@ -173,7 +184,22 @@ def process_encryption(flag):
     input_b = input("Enter input_b: ").encode()
     #print("input_a = " + str(input_a))
     #print("input_a.class = " + str(input_a.__class__))
-    msg = b"Here\'s your beautiful flag that you just bought for " + input_a + b" bitcoins: " + flag + b". Aren\'t you glad you didn\'t buy a bunch of useless items like " + input_b + b"(s) instead?"
+    #print("flag.class = " + str(flag.__class__))
+    msg = b"Congratulations, you just completed your " + input_a + b" purchase instead of buying this beautiful flag: " + flag# input_a + b" bitcoins remaining: " + flag
+    #print(msg)
+    #msg += input_a 
+    #print(msg)
+    #msg += b" bitcoins: "
+    #print(msg) 
+    #msg += flag 
+    #print(msg)
+    msg += b". What were you thinking? Fortunately you still have a bitcoin balance of " + input_b + b" remaining!"
+    print(msg)
+    #msg += input_b
+    #print(msg) 
+    #msg += b"(s) instead!"
+    #print(msg)
+    #print(str(msg))
     #print("The message is: " + str(msg))
     hmac = get_hmac(msg)
     #print("The hmac is " + str(hmac))
@@ -181,8 +207,13 @@ def process_encryption(flag):
     #print(b"The new message is " + pt)
     #print("Is the hmac valid? " + str(hmac_is_valid(pt)))
     pt = pad(pt)
+    print(b"The plaintext is " + msg)#.decode().__class__))
+    #print("The class of the plaintext is: " + str(pt.__class__))
     ct = encrypt(pt)
+    #print("The class of the ciphertext is: " + str(ct.__class__))
+    #print(ct)
     print(b"A plane flies overhead flying a banner that reads: " + ct)
+    #print(len(b"A plane flies overhead flying a banner that reads: " + ct))
 
 def main():
 
