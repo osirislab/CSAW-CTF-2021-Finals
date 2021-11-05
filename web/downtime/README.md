@@ -94,3 +94,14 @@ The message preview will show the results, proving command execution is possible
         [object Object]
             flag{with_with_with_with_each_with_this}
 ```
+
+## Testing Notes
+
+1. The challenge website has a lot to explore. I think it would take a decent amount of time to figure out that the "mass email" function is where the template injection vulnerability lies. Idk if this would factor into the difficulty of the challenge, but I do think this would eat up a bit of time for people. Especially if the challenge description has no hints on what or where the vulnerability is.
+
+2. I don't have experience with Javascript templates, but once I located the "mass email" page, any message with double curly braces resulted in an error message. I wasn't able to notice the "handlebars" template in the error message at first, but I think for people that have more experience with Javascript templates, it wouldn't take them long to realize that it is a template injection vulnerability with the "handlebars" Javascript template language.
+
+3. After that, googling "handlebars template injection" gave me a bunch of blog posts. There is a lot of material online to read on it, especially regarding a vulnerability in the Shopify app. Interestingly, when I google "handlebars template injection ctf", this is the first link that comes up (https://ctftime.org/writeup/16447). It's from CSAW Quals 2019 about a challenge called "Buyify". Seems like the exact same vulnerability as the challenge we have here. It was a 500 point web challenge in CSAW Quals 2019.
+
+4. As for coming up with the actual injection payload, I can't say much about that. Personally I do not think I would have ever gotten the right payload within the duration of the competition. But who knows, with the amount of online writeups on "handlebars template injection", maybe I could have.
+Overall, it seems like a very similar challenge to the one used in previous CSAW Quals. The old challenge was weighted 500 points, but I'm sure having access to the writeup for that challenge will make this one much easier for a lot of people.
