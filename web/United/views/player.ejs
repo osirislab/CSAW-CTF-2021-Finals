@@ -35,7 +35,7 @@
             <% players.forEach(function(player){ %>
                 <tr scope="row">
                     <td><%= player.rowid %></td>
-                    <td><a href="/players/<%= player.rowid %>"><%= player.first + " " + player.last %></a></td>
+                    <td><a href="/players/<%= player.rowid %>-P"><%= player.first + " " + player.last %></a></td>
                     <td><%= player.specialty %></td>
                 </tr>
             <% }); %>

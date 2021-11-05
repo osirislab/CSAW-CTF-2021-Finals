@@ -27,6 +27,7 @@ const get_players = (...args) => {
 router.get('/', async (req,res) => {
 
     let p = await get_players();
+    console.log(p);
     res.render('player', {
         title: "Player Roster",
         players: p,
@@ -37,13 +38,25 @@ router.get('/', async (req,res) => {
 
 router.get('/:rowid', async (req, res) => { 
 
-    let p = await get_players(req.params.rowid);
-    res.render('player', {
-        //title: `${p[0].first} ${p[0].last}`,
-        title: "Player Roster",
-        players: p,
-        detail: true
-    })
+    var a = req.params.rowid;
+    if(a.toString().match(/-P/g)) {
+        var A = a.toString().replace(/-P$/g, "");
+        console.log(A); 
+        let p = await get_players(A);
+        res.render('player', {
+            //title: `${p[0].first} ${p[0].last}`,
+            title: "Player Roster",
+            players: p,
+            detail: true
+        })
+    } else {
+        let p = await get_players("0");
+        res.render('player', {
+            title: "Player Roster",
+            players: p,
+            detail: true
+        })
+    }
 });
 
 module.exports = router;
