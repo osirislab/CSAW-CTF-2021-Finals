@@ -33,12 +33,16 @@ app.post('/contact', (req, res) => {
         'emergency': false
     };
 
-    merge(details, req.body);
-    details.message = sanitize(details.message);
-
-    // needed only on live version to clean prototype pollution
-    // so that it doesn't affect all users or cause errors
-    delete {}.__proto__.whiteList;
+    try {
+        merge(details, req.body);
+        details.message = sanitize(details.message);
+    } finally {
+        // needed only on live version to clean prototype pollution
+        // so that it doesn't affect all users or cause errors
+        for (const prop in {}.__proto__) {
+            delete {}.__proto__[prop];
+        }
+    }
     
     if (details.message) {
         if (details.emergency) {
