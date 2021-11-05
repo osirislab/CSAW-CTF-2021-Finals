@@ -1,0 +1,15 @@
+{
+  "name": "C2-server",
+  "category": "misc",
+  "author": "Microsoft DART",
+  "description": "During an investigation, your security team found a web folder that allowed directory browsing on an attacker’s C2 server. In that folder, a backup file of the web content was discovered and downloaded. Review the contents of the zip file and determine how to take control of the attacker’s server.\nPlease submit it with the standard wrapper of flag{}",
+  "flag": "flag{ivan2020!}",
+  "box": "misc.chal.csaw.io",
+  "type": "dynamic",
+  "initial": 500,
+  "minimum": 50,
+  "decay": 275,
+  "files": [
+    "backup.zip"
+  ]
+}
