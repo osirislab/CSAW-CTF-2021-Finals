@@ -44,3 +44,8 @@ Chaining the vulnerabilities was very enjoyable, when you figure it out.
 I had to guess that there might be vulnerabilities in the imports. I also got a little stuck on the double encoding part, and just tried it out and it worked. It is pretty straightforward otherwise.
 
 For the Potential Issues, I was just wondering if there could be some race conditions created by clearing of prototype, causing confusion in players. It won't matter if the server only serves one request at a time, or if they're fast enough to not interfere.
+
+## Response
+I looked into this a little further after we initially discussed it. I believe that the single-threaded nature of Node.js and its event loop would mean that the server would never stop to handle another request in between the portion of the code that actually pollutes / clears the prototype. I also attempted to run some concurrency tests that confirmed this thinking.
+
+I'm going to reach out to someone else who hopefully has a deeper understanding of Node.js internals, but provided they don't see any additional issues, I think we're in the clear with this.
