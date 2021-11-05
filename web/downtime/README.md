@@ -95,7 +95,7 @@ The message preview will show the results, proving command execution is possible
             flag{with_with_with_with_each_with_this}
 ```
 
-## Testing Notes
+## Testing Notes - kip
 
 1. The challenge website has a lot to explore. I think it would take a decent amount of time to figure out that the "mass email" function is where the template injection vulnerability lies. Idk if this would factor into the difficulty of the challenge, but I do think this would eat up a bit of time for people. Especially if the challenge description has no hints on what or where the vulnerability is.
 
