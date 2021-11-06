@@ -1,0 +1,15 @@
+{
+    "name": "Imports",
+    "category": "forensics",
+    "author": "doina",
+    "description": "Find the only Win API function called by the shellcode.",
+    "flag": "flag{GetUserNameA}",
+    "initial": 0,
+    "minimum": 0,
+    "decay": 0,
+    "files": [
+        "shellcode.txt"
+    ]
+  }
+  
+
