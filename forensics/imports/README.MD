@@ -1,15 +1,38 @@
-Most malware writers use this technique to compute the imports (not only for shellcode but also for malware executables).
+# Imports
 
+## Why this challenge?
 
-The challenge is a hex-ed shellcode xored with 0x29 (it's visually obvious what the key is). As any shellcode it is position independent and variables are referred by an offset to the beginning.
+Most malware writers use this technique to compute the imports - not only for shellcode but also for malware executables.
 
-It checks the BeingDebugged flag from PEB and, if the process is debugged, it jumps to a location and starts executing from there until it crashes (so it's not immediately obvious that's anti-debugging).
-It searches for the GetUserNameA function from the advapi32.dll library starting from PEB. In order to do that it enumerates all loaded modules from PEB, converts the name to lower-case ascii and computes a hash used by the trickbot malware loader for the same purpose. if the hash matches with the hash I hardcoded, then it gets advapi's address and starts parsing advapi for the exported functions. In order to find the function, it enumerates the exported functions and computes the hash until it matches the hardcoded one. In the end, it uses the function to obtain the username on the system on which the shellcode is executed. This is the flag.
+## What's in the challenge?
+
+The [challenge](./shellcode.txt) is the hex of a shellcode xored with 0x29. The key for the xor is visually obvious because the shellcode contains 48 zero-es near the beginning. As any shellcode, it is position independent. The shellcode computes the address of a function without mentioning the name of the module or the function:
+- get PEB (Process Environment Block) address
+- from PEB, list all the loaded modules in search of a particular module (advapi32.dll in this case)
+- compute a hash on the each loaded module's ascii lower-case name and compare it with a hardcoded value, if they match it's the searched module
+- from the address of the found module, parse it's exports and list all the exported function names in search of a particular function name (GetUserNameA in this case)
+- compute a hash on the each exported function's ascii lower-case name and compare it with a hardcoded value, if they match it's the searched function
+- call the function name to get the result
+
+The hash function is the one used by the Trickbot malware family's loader and it's python implementation is in [hash_function.py](./hash_function.py).
+
+The flag is the name of the function searched and called by the shellcode - flag{GetUserNameA}.
+
+## Anti-debugging
+
+It checks the BeingDebugged flag from PEB. If the process is not debugged, then it proceeds to execute the code as expected, otherwise it jumps to another location and starts executing from there until it crashes because the required variables are not properly initialized. At first glance it seems an if that executes different things depending on the outcome of the condition. In reality, it will eventually crash if the code is debugged.
+
+## Solution
 
 They can statically analyze the code, in which case they'll need to understand PEB, PE format, hashes.
-Or they can debug the shellcode. One of the ways in which they could debug it is by opening a 32-bit executable in a debugger and copying the shellcode at entry point. If the advapi32.dll library is already loaded in that process, they'll just observe when they get to it. Otherwise they'll need to compute the hash for dlls from system32 to figure out which dll the shellcode is looking for. They'll need to make sure the section the shellcode is executing from has Full Access (it can be added from the debugger, of course).
 
-The python implementation of the hash function is in [hash_function.py](./hash_function.py)
+Or they can debug the shellcode. One of the ways in which they could debug it:
+- Open a 32-bit executable in a debugger.
+- Copy the shellcode at entry point.
+- If the advapi32.dll library is already loaded in that process, they'll just observe when they get to it. Otherwise they'll need to compute the hash for dlls from system32 to figure out which dll the shellcode is looking for.
+- They'll need to make sure the section the shellcode is executing from has Full Access (Read, Write, Execute).
+
+## Assembly code
 
 This is the assembly code with comments and labels:
 
