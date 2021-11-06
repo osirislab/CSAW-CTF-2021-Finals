@@ -1,9 +1,9 @@
 {
-  "name": "Zip Crypto",
+  "name": "Not Too Taxing",
   "category": "crypto",
   "author": "mastertg",
-  "description": "",
-  "flag": "flag{5up3r_53cr37_p455w0rd}",
+  "description": "We intercepted some email communications between a tax consultant and his client that contained some important tax documents. We were able to successfully extract two of the documents, but we can't figure out the password to the file in order to extract the data. Attached are the two extracted files, Tax_Ret_Form_Blank.pdf and Tax_Ret_Form_Nov_2021.zip, and a transcript of the emails we found, SPBlock_Email.pdf.\n\nCan you figure out the password so we can get this guy's info?",
+  "flag": "flag{y0u_5h0uld_n3v3r_u53_z1pcryp70}",
   "type": "dynamic",
   "initial": 500,
   "minimum": 50,
