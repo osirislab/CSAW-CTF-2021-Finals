@@ -8,7 +8,7 @@
     "initial": 500,
     "minimum": 50,
     "decay": 275,
-    "files": [],
+    "files": ["losing_my_marbles"],
     "internal_port": 5000,
     "box": "crypto.chal.csaw.io"
   }
