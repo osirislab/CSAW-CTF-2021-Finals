@@ -3,14 +3,15 @@
   "category": "crypto",
   "author": "mastertg",
   "description": "",
-  "flag": "flag{}",
+  "flag": "flag{5up3r_53cr37_p455w0rd}",
   "type": "dynamic",
   "initial": 500,
   "minimum": 50,
   "decay": 275,
   "files": [
     "Tax_Ret_Form_Nov_2021.zip",
-    "Tax_Ret_Form_Blank.pdf"
+    "Tax_Ret_Form_Blank.pdf",
+    "SPBlock_Email.pdf"
   ],
   "box": "crypto.chal.csaw.io",
   "internal_port": 5000
