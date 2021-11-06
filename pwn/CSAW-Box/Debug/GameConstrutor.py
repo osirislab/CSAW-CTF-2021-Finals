@@ -90,7 +90,7 @@ data+=call(280)#logo
 data+=set_reg(0,0)
 data+=call(244)#vul
 data+=set_reg(0,0)
-data+=b"\x99"
+data+=b"\xff"
 # main end
 print("Function PUTS:",len(data))
 # puts #

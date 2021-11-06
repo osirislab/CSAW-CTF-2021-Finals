@@ -1,3 +1,5 @@
+//@n132
+//pseudo-code for debugging, there may be lots of differences to the released csaw_game
 #include<stdio.h>
 #include<string.h>
 #include <stdlib.h>
