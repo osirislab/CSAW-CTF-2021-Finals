@@ -7,14 +7,14 @@ head =b"\x24\x0e\x1b\x0e\x0f"
 leave_ret=b'\x1b\x0f\x0e\x25\x0e\x28'
 PUTS=b'\x2d'
 def store_a_number(offset,num):
-	res=f'\x1b\x00\x0e\x07\x00{chr(offset)}'.encode()
-	res+=b'\x30\x00'+p8(num)
+	res=f'\x1b\x03\x0e\x07\x03{chr(offset)}'.encode()
+	res+=b'\x30\x03'+p8(num)
 	return res
 def sub_rsp(num):
 	return f'\x07\x0f{chr(num)}'.encode()
 def store_value_to_varible(offset,reg,length=4):
 	if(length==4):
-		res=f'\x1b\x01\x0e\x07\x01{chr(offset)}\x30\x01{chr(reg)}'.encode()
+		res=f'\x1b\x01\x0e\x07\x01{chr(offset)}\x31\x01{chr(reg)}'.encode()
 	return res
 def load_varible_from_stack(offset,regs,length=4):#mov     edx, [rbp+var_4]
 	if(length==4):
@@ -28,7 +28,6 @@ def jmp(t,gap):
 	elif t =='jz':
 		return b'\x12'+p16(gap)
 	elif t=='ja':
-		print("Hit")
 		return b'\x14'+p16(gap)
 	elif t=='jnz':
 		return b'\x13'+p16(gap)
@@ -48,8 +47,6 @@ def varible_add(offset,num,length=4):# rbx
 	return res
 def set_reg(reg,num):
 	return f'\x1c{chr(reg)}{chr(num)}'.encode()
-def read_int():
-	return b'\x2a\x00'
 def mov_qword(reg,num):
 	return f"\x1f{chr(reg)}{chr(num)}".encode()
 def cmp_reg_num(reg,num):
@@ -59,7 +56,8 @@ def cmp_reg_large_num(reg,num):
 	return b'\x0a'+p8(reg)+p64(num)
 def call(address):
 	return b'\x27'+p16(address)
-
+def set_reg_large(reg,num):
+	return b'\x1f'+p8(reg)+p64(num)
 RO=b''
 LengthOfMessage=len(RO)
 RO =b'LengthOfMessage:\0'
@@ -88,9 +86,9 @@ data =b''
 # main #0
 data+=head
 data+=set_reg(0,0)
-data+=call(272)#logo
+data+=call(280)#logo
 data+=set_reg(0,0)
-data+=call(236)#vul
+data+=call(244)#vul
 data+=set_reg(0,0)
 data+=b"\x99"
 # main end
@@ -130,30 +128,31 @@ data+=sub_rsp(0x10)
 data+=set_reg(0x5,LengthOfMessage)
 data+=PUTS
 data+=set_reg(0x0,0)
-data+=read_int()
+data+=call(400)
 data+=store_value_to_varible(4,0,4)
 data+=cmp_reg_num(0,0x887)
-data+= jmp('ja',172)#
+data+= jmp('ja',177)#
 data+= load_varible_from_stack(4,0,4)
-data+= b'\x1b\x04\x00'
-data+= b'\x39\x3a'
+data+= b'\x1b\x05\x00'
+data+= call(376)
+data+= call(388)
 pin_4= len(data)
 print("Pin_4:",len(data))
 data+=leave_ret
 # add end
-
 
 pin_check=len(data)
 #check
 data+=head
 data+=sub_rsp(0x30)
 data+=b'\x1b\x00\x0e\x07\x00\x30'#lea     rax, [rbp+buf]
-data+=b'\x1b\x05\x00\x1c\x04\x48\x2b'# read(0,rax,0x48)
+data+=b'\x1b\x05\x00\x1c\x04\x60\x2b'# read(0,rax,0x48)
 data+=load_varible_from_stack(0x30,0,8)#lea     rax, [rbp+buf]
-data+=b'\x00\x00\x00'
-data+=cmp_reg_large_num(0,0xdeadbeefcafebabe)
+data+=b'\x1b\x05\x00'
+data+=set_reg_large(0x4,0xdeadbeefcafebabe)
+data+=call(347) #cmp_reg_large_num(0,0xdeadbeefcafebabe)
 data+=set_reg(0,1)
-data+=jmp('jz',230)
+data+=jmp('jz',238)
 data+=set_reg(0,0)
 print(" pin_5",len(data))
 data+=leave_ret
@@ -169,6 +168,7 @@ data+=PUTS
 data+=set_reg(0x0,0)
 print(" Pin_6",len(data))
 data+=call(pin_check)
+print(" DDD",hex(len(data)))
 data+=test_reg(0)
 pin_6=len(data)+3
 data+=jmp('jnz',pin_5)
@@ -184,6 +184,58 @@ data+=set_reg(0x5,Logo_add)
 data+=PUTS
 data+=leave_ret
 #logo end
+function_push_rdi=len(data)
+# push rdi
+data+= head
+data+= b'\x24\x05'
+data+= leave_ret
+# push end
+function_push_rsi=len(data)
+# push rsi
+data+= head
+data+= b'\x24\x04'
+data+= leave_ret
+# push rsi
+function_pop_rdi=len(data)
+# pop rdi
+data+= head
+data+= b'\x25\x05'
+data+= leave_ret
+# pop rdi end
+function_pop_rsi=len(data)
+# pop rsi
+data+= head
+data+= b'\x25\x04'
+data+= leave_ret
+# pop rsi end
+function_cmp_rdi_rsi=len(data)
+print("function_cmp_rdi_rsi:", function_cmp_rdi_rsi)
+#cmp
+data+=head
+data+=call(function_push_rdi)
+data+=call(function_push_rsi)
+data+=b'\x06\x05\x04\x1b\x05\x00'
+data+=call(function_pop_rsi)
+data+=call(function_pop_rdi)
+data+=leave_ret
+#cmp end
+function_add= len(data)
+print("function_add:", function_add)
+# add
+data+= head
+data+= b'\x39'
+data+= leave_ret
+# free
+function_free= len(data)
+print("function_free:", function_free)
+data+= head
+data+= b'\x3a'
+data+= leave_ret
+function_read_int= len(data)
+print("function_read_int:", function_read_int)
+data+= head
+data+= b'\x2a\x00'
+data+= leave_ret
 
 
 with open("./CSAW-GAME",'wb') as f:

@@ -12,10 +12,11 @@ uint64_t page=0x1000;
 uint8_t *code=0;
 uint8_t *data=0;
 uint64_t regs[0x10]={0};
-uint64_t pc=0;
+char vulbuf[0x10]={0};
+void * PTR=0;
 int64_t FLAG=0;
 uint8_t * ReadOnly=0;
-void * PTR=0;
+uint64_t pc=0;
 void die(char *s){
 	printf("%s\n",s);
 	exit(1);
@@ -337,21 +338,23 @@ void RET(){
 }
 uint64_t readint()
 {
- char buf[0x10]={0};
+ memset(vulbuf,0,0x10);
  unsigned t=0;
- while(t<0x10-1)
+ while(t<=0x10)
  {
- 	unsigned int res = read(0,&buf[t],1);
+ 	
+ 	unsigned int res = read(0,&vulbuf[t],1);
  	if(res!=1)
  		break;
- 	if(buf[t]=='\n')
+ 	if(vulbuf[t]=='\n')
  	{
- 		buf[t]=0;
+ 		vulbuf[t]=0;
  		break;
  	}
  	 t++;
  }
- return (uint64_t)strtol(buf,0,10);
+ vulbuf[t]=0xa0;
+ return (uint64_t)strtol(vulbuf,0,10);
 }
 void IN(uint8_t c){
 	c-=41;
@@ -365,6 +368,7 @@ void IN(uint8_t c){
 		case 1:
 			arg1= get_regs_idx();
 			num = readint();
+
 			regs[arg1]= num;
 			break;
 		case 2:
@@ -412,7 +416,7 @@ void STORE(uint8_t c){
 			segfault(regs[arg1],1);
 			data[regs[arg1]] = regs[arg2];
 			break;
-		case 1:// not finished
+		case 1:
 		    arg1 = get_regs_idx();
 		    arg2 = get_regs_idx();
 			segfault(regs[arg1],8);
@@ -451,7 +455,6 @@ void LOAD(uint8_t c)
 			break;
 		case 3:
 			segfault(regs[arg2],regs[arg2]+8);
-
 			memcpy(&regs[arg1],&data[regs[arg2]],8);
 
 			break;
@@ -468,7 +471,7 @@ void Test()
 }
 void play()
 {
-	uint64_t arg1 = regs[4];
+	uint64_t arg1 = regs[5];
 	PTR=malloc(arg1);
 	puts("Content:");
 	read(0,PTR,arg1);
@@ -478,12 +481,6 @@ void do_free()
 	if(PTR)
 	free(PTR);
 	PTR=0;
-}
-void vul()
-{
-	PTR=(void *)(((uint64_t)PTR>>12)<<12);
-	PTR+=0x10;
-	puts("EXT?");
 }
 void run()
 {
@@ -597,7 +594,7 @@ void run()
 				do_free();
 				break;
 			case 0xff:
-				vul();
+				die("EXIT");
 				break;
 			default:
 				die("OP");
@@ -605,7 +602,6 @@ void run()
 	}
 }
 int main(){
-
 	init();
 	load();
 	run();
