@@ -2,6 +2,8 @@
 
 Misc CTF Challenge for CSAW Finals 2021
 
+This challenge is also available at https://github.com/psifertex/terminal_velocity
+
 # Deploying
 
 ```
